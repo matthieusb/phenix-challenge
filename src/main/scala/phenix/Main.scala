@@ -1,6 +1,9 @@
 package phenix
 
-object Hello extends Greeting with App {
+import better.files._
+
+
+object Main extends Greeting with App {
   println(greeting)
 }
 
