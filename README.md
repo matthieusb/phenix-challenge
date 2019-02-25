@@ -1,4 +1,7 @@
 # phenix-challenge
+
+[![Build Status](https://travis-ci.org/matthieusb/phenix-challenge.svg?branch=master)](https://travis-ci.org/matthieusb/phenix-challenge)
+
 Solution apportée au projet Carrefour https://github.com/Carrefour-Group/phenix-challenge
 
 ## Pré-requis
