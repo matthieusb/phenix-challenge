@@ -3,6 +3,8 @@ package phenix
 import java.nio.file.Paths
 
 import org.scalatest.{FlatSpec, Matchers}
+import phenix.model.{Product, Transaction}
+import phenix.service.{ProductMarshaller, TransactionMarshaller}
 
 
 class MarshallerSpec extends FlatSpec with Matchers {
