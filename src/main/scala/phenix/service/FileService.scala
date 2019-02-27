@@ -18,7 +18,7 @@ trait FileProducer extends LazyLogging {
     * @param outputFilePath the file path to write
     * @param content the content to write as a string stream
     */
-  def writeRecordFile(outputFilePath: Path, content: Stream[String]) = {
+  def writeRecordFile(outputFilePath: Path, content: Stream[String]): Unit = {
     val fileToOutput = file"${outputFilePath.toAbsolutePath.toString}"
     logger.info(s"Écriture du fichier ${outputFilePath.toAbsolutePath.toString}")
 

@@ -13,7 +13,6 @@ trait Marshaller[T, U, V] extends FileIngester {
   val CARREFOUR_FILENAME_DATE_FORMAT = new SimpleDateFormat("YYYYMMDD")
   val CARREFOUR_FILE_METADATA_SEPARATOR = "_"
 
-  // TODO Refactor: the file ingestion should be done prior to the marhsaller by an orchestrator object
   def marshallFile(filePath: Path, deserializeFunction: String => U): Try[Stream[U]] = {
     ingestRecordFile(filePath) match {
       case Success(lines) => Success(lines.map(line => deserializeFunction(line)))

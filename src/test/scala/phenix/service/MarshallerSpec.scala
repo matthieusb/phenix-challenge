@@ -5,7 +5,7 @@ import java.nio.file.Paths
 import org.scalatest.{FlatSpec, Matchers}
 import phenix.model.{Product, Products, Transaction, Transactions}
 
-import scala.util.{Failure, Try}
+import scala.util.Try
 
 
 class MarshallerSpec extends FlatSpec with Matchers {
@@ -32,7 +32,7 @@ class MarshallerSpec extends FlatSpec with Matchers {
     transactions.get.transactions should contain (Transaction(9999, TransactionMarshaller.CARREFOUR_TRANSACTION_DATE_FORMAT.parse("20170514T111747+0100"), "10f2f3e6-f728-41f3-b079-43b0aa758292", 703, 1))
 
 
-    transactions.get.metaData.date shouldBe TransactionMarshaller.CARREFOUR_FILENAME_DATE_FORMAT.parse("20170514")
+    transactions.get.metaData.date shouldBe TransactionMarshaller.CARREFOUR_FILENAME_DATE_FORMAT.parse("20170514")  // TODO THis test is not good
   }
 
   "The Product File Marshaller" should "return an error when file is not found" in {
@@ -56,6 +56,6 @@ class MarshallerSpec extends FlatSpec with Matchers {
     products.get.products should contain (Product(999, 0.68))
 
     products.get.metaData.shopUuid shouldBe "2a4b6b81-5aa2-4ad8-8ba9-ae1a006e7d71"
-    products.get.metaData.date shouldBe ProductMarshaller.CARREFOUR_FILENAME_DATE_FORMAT.parse("20170514")
+    products.get.metaData.date shouldBe ProductMarshaller.CARREFOUR_FILENAME_DATE_FORMAT.parse("20170514") // TODO THis test is not good
   }
 }
