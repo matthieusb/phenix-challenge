@@ -15,7 +15,7 @@ trait Marshaller[T, U, V] extends FileIngester {
 
   // TODO Refactor: the file ingestion should be done prior to the marhsaller by an orchestrator object
   def marshallFile(filePath: Path, deserializeFunction: String => U): Try[Stream[U]] = {
-    ingestFile(filePath) match {
+    ingestRecordFile(filePath) match {
       case Success(lines) => Success(lines.map(line => deserializeFunction(line)))
       case Failure(throwable) => Failure(throwable)
     }
@@ -44,8 +44,8 @@ object TransactionMarshaller extends Marshaller[Transactions, Transaction, Trans
   override def marshallLines(filePath: Path): Try[Transactions] = {
     (marshallFile(filePath, marshallLineString), marshallFileName(filePath)) match {
       case (Success(transactionStream), Success(transactionMetaData)) => Success(Transactions(transactionStream, transactionMetaData))
-      case (Failure(throwable), _) => Failure(new IllegalArgumentException(throwable.getMessage))
-      case (_, Failure(throwable)) => Failure(new IllegalArgumentException(throwable.getMessage))
+      case (Failure(throwable), Success(_)) => Failure(new IllegalArgumentException(throwable.getMessage))
+      case (Success(_), Failure(throwable)) => Failure(new IllegalArgumentException(throwable.getMessage))
       case (Failure(throwableStream), Failure(throwableMetadata)) => Failure(new IllegalArgumentException(s"Erreurs multiples: $throwableStream ; $throwableMetadata"))
     }
   }
@@ -72,8 +72,8 @@ object ProductMarshaller extends Marshaller[Products, Product, ProductFileMetaDa
   override def marshallLines(filePath: Path): Try[Products] = {
     (marshallFile(filePath, marshallLineString), marshallFileName(filePath)) match {
       case (Success(productStream), Success(productsMetaData)) => Success(Products(productStream, productsMetaData))
-      case (Failure(throwable), _) => Failure(new IllegalArgumentException(throwable.getMessage))
-      case (_, Failure(throwable)) => Failure(new IllegalArgumentException(throwable.getMessage))
+      case (Failure(throwable), Success(_)) => Failure(new IllegalArgumentException(throwable.getMessage))
+      case (Success(_), Failure(throwable)) => Failure(new IllegalArgumentException(throwable.getMessage))
       case (Failure(throwableStream), Failure(throwableMetadata)) => Failure(new IllegalArgumentException(s"Erreurs multiples: $throwableStream ; $throwableMetadata"))
     }
   }

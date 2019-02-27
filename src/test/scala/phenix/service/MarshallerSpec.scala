@@ -5,18 +5,17 @@ import java.nio.file.Paths
 import org.scalatest.{FlatSpec, Matchers}
 import phenix.model.{Product, Products, Transaction, Transactions}
 
-import scala.util.Try
+import scala.util.{Failure, Try}
 
 
 class MarshallerSpec extends FlatSpec with Matchers {
 
-  "The Transaction File Marshaller" should "return an empty stream when file is not found" in {
+  "The Transaction File Marshaller" should "return an error when file is not found" in {
     // PREPARE/EXECUTE
     val transactions: Try[Transactions] = TransactionMarshaller.marshallLines(Paths.get("not/an/existant/path/in/this/project"))
 
     // ASSERT
     transactions.isFailure shouldBe true
-    // TODO Get failure message and test it + change test name
   }
 
   "The Transaction File Marshaller" should "return a stream with the right transactions and correct file metadata" in {
@@ -36,13 +35,12 @@ class MarshallerSpec extends FlatSpec with Matchers {
     transactions.get.metaData.date shouldBe TransactionMarshaller.CARREFOUR_FILENAME_DATE_FORMAT.parse("20170514")
   }
 
-  "The Product File Marshaller" should "return an empty stream when file is not found" in {
+  "The Product File Marshaller" should "return an error when file is not found" in {
     // PREPARE/EXECUTE
     val products: Try[Products] = ProductMarshaller.marshallLines(Paths.get("not/an/existant/path/in/this/project"))
 
     // ASSERT
     products.isFailure shouldBe true
-    // TODO Get failure message and test it + change test name
   }
 
   "The Product File Marshaller" should "return a stream with the right products and correct file metadata" in {
