@@ -32,7 +32,8 @@ object Orchestrator extends LazyLogging {
       })
 
       // TODO Put in a variable and write to a file
-      IndicatorCalculator.computeDayKpi(transactions, productsStream)
+      println("---------- RESULTAT")
+      println(IndicatorCalculator.computeDayKpi(transactions, productsStream))
     })
   }
 }

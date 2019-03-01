@@ -1,6 +1,6 @@
 package phenix.calculator
 
-import java.util.Date
+import java.time.LocalDate
 
 import com.typesafe.scalalogging.LazyLogging
 import phenix.model._
@@ -41,7 +41,7 @@ object IndicatorCalculator extends LazyLogging {
     CompleteDayKpi(dayShopSales, dayGlobalSale, dayShopTurnovers, dayGlobalTurnover)
   }
 
-  def computeGlobalDaySales(date: Date, dayShopSales: Stream[DayShopSale]): DayGlobalSale = {
+  def computeGlobalDaySales(date: LocalDate, dayShopSales: Stream[DayShopSale]): DayGlobalSale = {
     logger.info(s"Calcul du nombre de ventes global pour la date $date")
 
     val aggregatedProductSales = dayShopSales.flatMap(dayShopSale => {
@@ -57,7 +57,7 @@ object IndicatorCalculator extends LazyLogging {
     DayGlobalSale(date, aggregatedProductSales.toStream)
   }
 
-  def computeGlobalDayTurnover(date: Date, dayShopTurnovers: Stream[DayShopTurnover]): DayGlobalTurnover = {
+  def computeGlobalDayTurnover(date: LocalDate, dayShopTurnovers: Stream[DayShopTurnover]): DayGlobalTurnover = {
     logger.info(s"Calcul du CA global pour la date $date")
 
     val aggregateProductTurnovers = dayShopTurnovers.flatMap(dayShopTurnover => {

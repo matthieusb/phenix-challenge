@@ -1,15 +1,13 @@
 package phenix.calculator
 
-import java.util.Date
+import java.time.LocalDate
 
 import org.scalatest.{FlatSpec, Matchers}
 import phenix.model.{Product, ProductSale, _}
 import phenix.service.TransactionMarshaller
 
 class IndicatorCalculatorByDaySpec extends FlatSpec with Matchers {
-  val dayDate: Date = TransactionMarshaller.CARREFOUR_FILENAME_DATE_FORMAT.parse("20170514")
-  val datetimeOne: Date = TransactionMarshaller.CARREFOUR_TRANSACTION_DATE_FORMAT.parse("20170514T223544+0100")
-  val datetimeTwo: Date = TransactionMarshaller.CARREFOUR_TRANSACTION_DATE_FORMAT.parse("20170514T103544+0100")
+  val dayDate: LocalDate = LocalDate.parse("20170514", TransactionMarshaller.CARREFOUR_FILENAME_DATE_FORMAT)
 
   // TODO Change the way dates are handled here, not working correctly for now
 
@@ -22,18 +20,18 @@ class IndicatorCalculatorByDaySpec extends FlatSpec with Matchers {
 
   val transactionStream: Stream[Transaction] = List(
     // Shop 1
-    Transaction(1, datetimeOne, shopUuidOne, productIdOne, 2),
-    Transaction(5, datetimeOne, shopUuidOne, productIdOne, 10),
-    Transaction(10, datetimeOne, shopUuidOne, productIdTwo, 15),
-    Transaction(3, datetimeOne, shopUuidOne, productIdThree, 1),
-    Transaction(9, datetimeOne, shopUuidOne, productIdThree, 2),
+    Transaction(1, shopUuidOne, productIdOne, 2),
+    Transaction(5, shopUuidOne, productIdOne, 10),
+    Transaction(10, shopUuidOne, productIdTwo, 15),
+    Transaction(3, shopUuidOne, productIdThree, 1),
+    Transaction(9, shopUuidOne, productIdThree, 2),
 
     // Shop 2
-    Transaction(2, datetimeTwo, shopUuidTwo, productIdTwo, 5),
-    Transaction(6, datetimeTwo, shopUuidTwo, productIdTwo, 8),
-    Transaction(7, datetimeTwo, shopUuidTwo, productIdTwo, 3),
-    Transaction(4, datetimeOne, shopUuidTwo, productIdThree, 3),
-    Transaction(8, datetimeOne, shopUuidTwo, productIdThree, 3)
+    Transaction(2, shopUuidTwo, productIdTwo, 5),
+    Transaction(6, shopUuidTwo, productIdTwo, 8),
+    Transaction(7, shopUuidTwo, productIdTwo, 3),
+    Transaction(4, shopUuidTwo, productIdThree, 3),
+    Transaction(8, shopUuidTwo, productIdThree, 3)
   ).toStream
   val transactions = Transactions(transactionStream, transactionFileMetadata)
 
