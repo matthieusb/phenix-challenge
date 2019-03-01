@@ -104,19 +104,24 @@ object IndicatorCalculator extends LazyLogging {
   def roundValue(numberToRound: Double): Double = Math.round(numberToRound * 100.0) / 100.0
 
   /**
-    * TODO DOcumentation
+    * Given a shop uuid and a products list, this function returns the correct product price.
+    * If the product price is not found for this shop, returns 0.
     *
     * FIXME Some error handling could be done here
-    * @param productId
-    * @param shopUuid
-    * @param dayProductsList
+    * @param productId the product which price you want to get
+    * @param shopUuid the shop you want to find it in
+    * @param dayProductsList the products to browse for you product price
     * @return
     */
   def getProductPriceFromProducts(productId: Int, shopUuid: String, dayProductsList: Stream[Products]): Double = {
+    // TODO Il faut absolument trouver un moyen de grer les cas où le prix n'est pas trouvé, sinon ça plante ici
     dayProductsList
       .find(dayProducts => dayProducts.metaData.shopUuid == shopUuid)
       .get.products.find(product => product.productId == productId)
-      .get.price
+    match {
+      case Some(prod) => prod.price
+      case None => 0.0
+    }
   }
 
 }
