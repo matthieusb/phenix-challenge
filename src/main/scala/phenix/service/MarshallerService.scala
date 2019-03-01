@@ -12,7 +12,6 @@ trait Marshaller[T, U, V] extends FileIngester {
   val CARREFOUR_HORIZONTAL_SEPARATOR: String = """\|"""
   val CARREFOUR_FILENAME_DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
   val CARREFOUR_FILE_METADATA_SEPARATOR: String = "_"
-  val CARREFOUR_DATA_FILE_EXTENSION = """.data"""
 
   def marshallFile(filePath: Path, deserializeFunction: String => U): Try[Stream[U]] = {
     ingestRecordFile(filePath) match {

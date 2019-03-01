@@ -7,10 +7,23 @@ import com.typesafe.scalalogging.LazyLogging
 
 import scala.util.{Failure, Success, Try}
 
+trait FileService {
+  val CARREFOUR_DATA_FILE_EXTENSION = """.data"""
+}
+
 /**
   * Default methods to write content into files
   */
-trait FileProducer extends LazyLogging {
+trait FileProducer extends FileService with LazyLogging {
+  val TOP100_PREFIX = "top_100"
+  val TOP100_PREFIX_SALES = s"${TOP100_PREFIX}_ventes"
+  val TOP100_GLOBAL = "GLOBAL"
+  val TOP100_PREFIX_TURNOVER = s"${TOP100_PREFIX}_ca"
+
+  val J7_SUFFIX="-J7"
+
+
+
   /**
     * Outputs data to a file line by line, create the file and its parent path if it does not exist
     * CAREFUL: overwrites file content.
@@ -35,7 +48,7 @@ trait FileProducer extends LazyLogging {
 /**
   * Default methods to consume content of files
   */
-trait FileIngester extends LazyLogging {
+trait FileIngester extends FileService with LazyLogging {
   /**
     * Ingests file content line by line, except if the file does not exist.
     *

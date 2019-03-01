@@ -50,7 +50,7 @@ object Orchestrator extends LazyLogging {
 
       val dayKpiResults = IndicatorCalculator.computeDayKpi(transactions, productsStream)
       outputCompleteDayKpi(dayKpiResults)
-      logger.error(dayKpiResults.toString)
+      logger.info(dayKpiResults.toString)
     })
   }
 
