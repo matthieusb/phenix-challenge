@@ -5,19 +5,24 @@ import java.time.LocalDate
 case class ProductSale(productId: Int, quantity: Int)
 case class ProductTurnover(productId: Int, turnover: Double)
 
-trait Day {
-  val date: LocalDate
+object ProductSaleOrdering extends Ordering[ProductSale] {
+  override def compare(ps1: ProductSale, ps2: ProductSale): Int = ps1.quantity compare ps2.quantity
 }
 
-trait DayShop extends Day {
+object ProductTurnoverOrdering extends Ordering[ProductTurnover] {
+  override def compare(ps1: ProductTurnover, ps2: ProductTurnover): Int = ps1.turnover compare ps2.turnover
+}
+
+
+trait Shop {
   val shopUuid: String
 }
 
-case class DayShopSale(date: LocalDate, shopUuid: String, productSales: Stream[ProductSale]) extends DayShop
-case class DayGlobalSale(date: LocalDate, productSales: Stream[ProductSale]) extends Day
+case class DayShopSale(shopUuid: String, productSales: Stream[ProductSale]) extends Shop
+case class DayGlobalSale(productSales: Stream[ProductSale])
 
-case class DayShopTurnover(date: LocalDate, shopUuid: String, productTurnovers: Stream[ProductTurnover]) extends DayShop
-case class DayGlobalTurnover(date: LocalDate, productTurnovers: Stream[ProductTurnover]) extends Day
+case class DayShopTurnover(shopUuid: String, productTurnovers: Stream[ProductTurnover]) extends Shop
+case class DayGlobalTurnover(productTurnovers: Stream[ProductTurnover])
 
-case class CompleteDayKpi(dayShopSales: Stream[DayShopSale], dayGlobalSales: DayGlobalSale,
+case class CompleteDayKpi(date: LocalDate, dayShopSales: Stream[DayShopSale], dayGlobalSales: DayGlobalSale,
                           dayShopTurnovers: Stream[DayShopTurnover], dayGlobalTurnover: DayGlobalTurnover)

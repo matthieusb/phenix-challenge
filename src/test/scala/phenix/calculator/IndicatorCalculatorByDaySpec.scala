@@ -55,8 +55,7 @@ class IndicatorCalculatorByDaySpec extends FlatSpec with Matchers {
     val dayKpiResult: CompleteDayKpi = IndicatorCalculator.computeDayKpi(transactions, List(productsOne, productsTwo).toStream)
 
     // ASSERT
-    all(dayKpiResult.dayShopSales.map(dayShopSale => dayShopSale.date)) shouldBe dayDate
-    dayKpiResult.dayGlobalSales.date shouldBe dayDate
+    dayKpiResult.date shouldBe dayDate
 
     // -- Tests on shop 1
     val shop1ProductSales = dayKpiResult.dayShopSales
@@ -85,8 +84,7 @@ class IndicatorCalculatorByDaySpec extends FlatSpec with Matchers {
     val dayKpiResult: CompleteDayKpi = IndicatorCalculator.computeDayKpi(transactions, List(productsOne, productsTwo).toStream)
 
     // ASSERT
-    all(dayKpiResult.dayShopTurnovers.map(dayShopSale => dayShopSale.date)) shouldBe dayDate
-    dayKpiResult.dayGlobalTurnover.date shouldBe dayDate
+    dayKpiResult.date shouldBe dayDate
 
     // -- Tests on shop 1
     val shop1ProductTuronovers = dayKpiResult.dayShopTurnovers
@@ -124,4 +122,6 @@ class IndicatorCalculatorByDaySpec extends FlatSpec with Matchers {
     productOneShopTwoPrice shouldBe 1.3
     productTwoShopOnePrice shouldBe 2.6
   }
+
+  // TODO Add a case where the price product could not be found
 }

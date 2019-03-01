@@ -8,7 +8,6 @@ import phenix.model._
 
 import scala.util.{Failure, Success, Try}
 
-
 trait Marshaller[T, U, V] extends FileIngester {
   val CARREFOUR_HORIZONTAL_SEPARATOR: String = """\|"""
   val CARREFOUR_FILENAME_DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
