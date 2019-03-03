@@ -37,7 +37,6 @@ object TransactionMarshaller extends Marshaller[Transactions, Transaction, Trans
     }
   }
 
-  // TODO This should be mutualized
   override def marshallLines(filePath: Path): Try[Transactions] = {
     (marshallFile(filePath, marshallLineString), marshallFileName(filePath)) match {
       case (Success(transactionStream), Success(transactionMetaData)) => Success(Transactions(transactionStream, transactionMetaData))
@@ -66,7 +65,6 @@ object ProductMarshaller extends Marshaller[Products, Product, ProductFileMetaDa
     }
   }
 
-  // TODO This should be mutualized
   override def marshallLines(filePath: Path): Try[Products] = {
     (marshallFile(filePath, marshallLineString), marshallFileName(filePath)) match {
       case (Success(productStream), Success(productsMetaData)) => Success(Products(productStream, productsMetaData))

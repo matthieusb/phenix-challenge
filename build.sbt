@@ -11,6 +11,7 @@ lazy val root = (project in file("."))
     name := "phenix-challenge",
     libraryDependencies ++= Seq(
       betterFiles,
+      scalaz,
 
       scalaLogging,
       slf4jBackend % Runtime,

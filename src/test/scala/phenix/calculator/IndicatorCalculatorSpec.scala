@@ -6,7 +6,7 @@ import org.scalatest.{FlatSpec, Matchers}
 import phenix.model.{Product, ProductSale, _}
 import phenix.service.TransactionMarshaller
 
-class IndicatorCalculatorByDaySpec extends FlatSpec with Matchers {
+class IndicatorCalculatorSpec extends FlatSpec with Matchers {
   val dayDate: LocalDate = LocalDate.parse("20170514", TransactionMarshaller.CARREFOUR_FILENAME_DATE_FORMAT)
 
   // TODO Change the way dates are handled here, not working correctly for now

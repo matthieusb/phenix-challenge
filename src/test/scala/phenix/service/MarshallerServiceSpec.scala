@@ -8,7 +8,7 @@ import phenix.model.{Product, Products, Transaction, Transactions}
 import scala.util.Try
 
 
-class MarshallerSpec extends FlatSpec with Matchers {
+class MarshallerServiceSpec extends FlatSpec with Matchers {
 
   "The Transaction File Marshaller" should "return an error when file is not found" in {
     // PREPARE/EXECUTE

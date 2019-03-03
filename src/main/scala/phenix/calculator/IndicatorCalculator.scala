@@ -21,7 +21,7 @@ object IndicatorCalculator extends LazyLogging {
     * @return
     */
   def computeDayKpi(dayTransactions: Transactions, dayProductsList: Stream[Products]): CompleteDayKpi = {
-    logger.info(s"Lancement des calculs des KPI par jour. Date: ${dayTransactions.metaData.date}")
+    logger.info(s"Launching KPI per day calculations. Date: ${dayTransactions.metaData.date}")
 
     val productKpiMapByShop = computeProductDayKpiByShop(dayTransactions, dayProductsList)
 
@@ -42,7 +42,7 @@ object IndicatorCalculator extends LazyLogging {
   }
 
   def computeGlobalDaySales(date: LocalDate, dayShopSales: Stream[DayShopSale]): DayGlobalSale = {
-    logger.info(s"Calcul du nombre de ventes global pour la date $date")
+    logger.info(s"Calculating global sales number for $date")
 
     val aggregatedProductSales = dayShopSales.flatMap(dayShopSale => {
       dayShopSale.productSales
@@ -58,7 +58,7 @@ object IndicatorCalculator extends LazyLogging {
   }
 
   def computeGlobalDayTurnover(date: LocalDate, dayShopTurnovers: Stream[DayShopTurnover]): DayGlobalTurnover = {
-    logger.info(s"Calcul du CA global pour la date $date")
+    logger.info(s"Calculating global turnover for $date")
 
     val aggregateProductTurnovers = dayShopTurnovers.flatMap(dayShopTurnover => {
       dayShopTurnover.productTurnovers
@@ -80,7 +80,7 @@ object IndicatorCalculator extends LazyLogging {
     * @return
     */
   def computeProductDayKpiByShop(dayTransactions: Transactions, dayProductsList: Stream[Products]): Map[String, Stream[(ProductSale, ProductTurnover)]] = {
-    logger.info(s"Calcul des kpi (Ventes, CA) pour la date ${dayTransactions.metaData.date}")
+    logger.info(s"Calculating global KPI (Sales, Turnover) for date ${dayTransactions.metaData.date}")
 
     dayTransactions.transactions
       .groupBy(transaction => (transaction.shopUuid, transaction.productId))
