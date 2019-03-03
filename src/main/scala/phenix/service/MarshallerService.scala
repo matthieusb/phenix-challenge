@@ -8,7 +8,7 @@ import phenix.model._
 
 import scala.util.{Failure, Success, Try}
 
-trait Marshaller[T, U, V] extends FileIngester {
+trait Marshaller[T, U] extends FileIngester {
   val CARREFOUR_HORIZONTAL_SEPARATOR: String = """\|"""
   val CARREFOUR_FILENAME_DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
   val CARREFOUR_FILE_METADATA_SEPARATOR: String = "_"
@@ -24,12 +24,14 @@ trait Marshaller[T, U, V] extends FileIngester {
 
   // NOTE: For now this method should not consider any possible errors in the source data
   def marshallLineString(line: String): U
-
-  // NOTE: For now this method should not consider any possible errors in the source filename
-  def marshallFileName(filePath: Path): Try[V]
 }
 
-object TransactionMarshaller extends Marshaller[Transactions, Transaction, TransactionFileMetaData] {
+trait FileNameMarshaller[T] {
+  // NOTE: For now this method should not consider any possible errors in the source filename
+  def marshallFileName(filePath: Path): Try[T]
+}
+
+object TransactionMarshaller extends Marshaller[Transactions, Transaction] with FileNameMarshaller[TransactionFileMetaData] {
   override def marshallLineString(line: String): Transaction = {
     line.split(CARREFOUR_HORIZONTAL_SEPARATOR) match {
       case Array(transactionId, _, shopUuid, productId, quantity) =>
@@ -56,7 +58,7 @@ object TransactionMarshaller extends Marshaller[Transactions, Transaction, Trans
   }
 }
 
-object ProductMarshaller extends Marshaller[Products, Product, ProductFileMetaData] {
+object ProductMarshaller extends Marshaller[Products, Product] with FileNameMarshaller[ProductFileMetaData] {
   val CARREFOUR_PRODUCT_FILE_PREFIX = "reference_prod-"
 
   override def marshallLineString(line: String): Product = {
