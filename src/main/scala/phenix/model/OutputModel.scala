@@ -8,5 +8,4 @@ trait FileOutputName {
 
 case class FileOutput(outputName: String, fileContentOutput: Stream[String]) extends FileOutputName
 
-
 case class KpiOutput(outputPath: Path, fileOutputs: Stream[FileOutput])
