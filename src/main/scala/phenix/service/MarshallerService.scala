@@ -8,12 +8,10 @@ import phenix.model._
 
 import scala.util.{Failure, Success, Try}
 
-
 trait Marshaller[T, U, V] extends FileIngester {
   val CARREFOUR_HORIZONTAL_SEPARATOR: String = """\|"""
   val CARREFOUR_FILENAME_DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
   val CARREFOUR_FILE_METADATA_SEPARATOR: String = "_"
-  val CARREFOUR_DATA_FILE_EXTENSION = """.data"""
 
   def marshallFile(filePath: Path, deserializeFunction: String => U): Try[Stream[U]] = {
     ingestRecordFile(filePath) match {
@@ -39,7 +37,6 @@ object TransactionMarshaller extends Marshaller[Transactions, Transaction, Trans
     }
   }
 
-  // TODO This should be mutualized
   override def marshallLines(filePath: Path): Try[Transactions] = {
     (marshallFile(filePath, marshallLineString), marshallFileName(filePath)) match {
       case (Success(transactionStream), Success(transactionMetaData)) => Success(Transactions(transactionStream, transactionMetaData))
@@ -68,7 +65,6 @@ object ProductMarshaller extends Marshaller[Products, Product, ProductFileMetaDa
     }
   }
 
-  // TODO This should be mutualized
   override def marshallLines(filePath: Path): Try[Products] = {
     (marshallFile(filePath, marshallLineString), marshallFileName(filePath)) match {
       case (Success(productStream), Success(productsMetaData)) => Success(Products(productStream, productsMetaData))

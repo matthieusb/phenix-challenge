@@ -5,11 +5,11 @@ import java.time.LocalDate
 import com.typesafe.scalalogging.LazyLogging
 import phenix.model._
 
+
 /**
   * Does the calculations to get indicators (sales, turnover) according to cases (one day, last 7 days).
   */
 object IndicatorCalculator extends LazyLogging {
-
 
   /**
     * TODO Documentation
@@ -21,28 +21,28 @@ object IndicatorCalculator extends LazyLogging {
     * @return
     */
   def computeDayKpi(dayTransactions: Transactions, dayProductsList: Stream[Products]): CompleteDayKpi = {
-    logger.info(s"Lancement des calculs des KPI par jour. Date: ${dayTransactions.metaData.date}")
+    logger.info(s"Launching KPI per day calculations. Date: ${dayTransactions.metaData.date}")
 
     val productKpiMapByShop = computeProductDayKpiByShop(dayTransactions, dayProductsList)
 
     val dayShopSales = productKpiMapByShop.keys.map(shopUuid => {
       val productSaleExtract = productKpiMapByShop(shopUuid).map(productDataTuple => productDataTuple._1)
-      DayShopSale(dayTransactions.metaData.date, shopUuid, productSaleExtract)
+      DayShopSale(shopUuid, productSaleExtract)
     }).toStream
 
     val dayShopTurnovers = productKpiMapByShop.keys.map(shopUuid => {
       val productSaleExtract = productKpiMapByShop(shopUuid).map(productDataTuple => productDataTuple._2)
-      DayShopTurnover(dayTransactions.metaData.date, shopUuid, productSaleExtract)
+      DayShopTurnover(shopUuid, productSaleExtract)
     }).toStream
 
     val dayGlobalSale = computeGlobalDaySales(dayTransactions.metaData.date, dayShopSales)
     val dayGlobalTurnover = computeGlobalDayTurnover(dayTransactions.metaData.date, dayShopTurnovers)
 
-    CompleteDayKpi(dayShopSales, dayGlobalSale, dayShopTurnovers, dayGlobalTurnover)
+    CompleteDayKpi(dayTransactions.metaData.date, dayShopSales, dayGlobalSale, dayShopTurnovers, dayGlobalTurnover)
   }
 
   def computeGlobalDaySales(date: LocalDate, dayShopSales: Stream[DayShopSale]): DayGlobalSale = {
-    logger.info(s"Calcul du nombre de ventes global pour la date $date")
+    logger.info(s"Calculating global sales number for $date")
 
     val aggregatedProductSales = dayShopSales.flatMap(dayShopSale => {
       dayShopSale.productSales
@@ -54,11 +54,11 @@ object IndicatorCalculator extends LazyLogging {
       ProductSale(globalResultMap._1, globalResultMap._2)
     })
 
-    DayGlobalSale(date, aggregatedProductSales.toStream)
+    DayGlobalSale(aggregatedProductSales.toStream)
   }
 
   def computeGlobalDayTurnover(date: LocalDate, dayShopTurnovers: Stream[DayShopTurnover]): DayGlobalTurnover = {
-    logger.info(s"Calcul du CA global pour la date $date")
+    logger.info(s"Calculating global turnover for $date")
 
     val aggregateProductTurnovers = dayShopTurnovers.flatMap(dayShopTurnover => {
       dayShopTurnover.productTurnovers
@@ -70,7 +70,7 @@ object IndicatorCalculator extends LazyLogging {
       ProductTurnover(globalResultMap._1, globalResultMap._2)
     })
 
-    DayGlobalTurnover(date, aggregateProductTurnovers.toStream)
+    DayGlobalTurnover(aggregateProductTurnovers.toStream)
   }
 
   /**
@@ -80,7 +80,7 @@ object IndicatorCalculator extends LazyLogging {
     * @return
     */
   def computeProductDayKpiByShop(dayTransactions: Transactions, dayProductsList: Stream[Products]): Map[String, Stream[(ProductSale, ProductTurnover)]] = {
-    logger.info(s"Calcul des kpi (Ventes, CA) pour la date ${dayTransactions.metaData.date}")
+    logger.info(s"Calculating global KPI (Sales, Turnover) for date ${dayTransactions.metaData.date}")
 
     dayTransactions.transactions
       .groupBy(transaction => (transaction.shopUuid, transaction.productId))
@@ -107,14 +107,12 @@ object IndicatorCalculator extends LazyLogging {
     * Given a shop uuid and a products list, this function returns the correct product price.
     * If the product price is not found for this shop, returns 0.
     *
-    * FIXME Some error handling could be done here
     * @param productId the product which price you want to get
     * @param shopUuid the shop you want to find it in
     * @param dayProductsList the products to browse for you product price
     * @return
     */
   def getProductPriceFromProducts(productId: Int, shopUuid: String, dayProductsList: Stream[Products]): Double = {
-    // TODO Il faut absolument trouver un moyen de grer les cas où le prix n'est pas trouvé, sinon ça plante ici
     dayProductsList
       .find(dayProducts => dayProducts.metaData.shopUuid == shopUuid)
       .get.products.find(product => product.productId == productId)
