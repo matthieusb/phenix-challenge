@@ -12,6 +12,7 @@ lazy val root = (project in file("."))
     libraryDependencies ++= Seq(
       betterFiles,
       scalaz,
+      scallop,
 
       scalaLogging,
       slf4jBackend % Runtime,

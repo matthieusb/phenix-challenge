@@ -8,6 +8,10 @@ Solution apportée au projet Carrefour https://github.com/Carrefour-Group/phenix
 
 TODO
 
+## Utilisation
+
+TODO
+
 ## Développement
 
 ### Commandes sbt
