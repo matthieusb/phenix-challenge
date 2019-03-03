@@ -2,7 +2,7 @@ package phenix.model
 
 import java.nio.file.Path
 
-trait FileOutputName {
+abstract class FileOutputName {
   val outputName: String
 }
 
