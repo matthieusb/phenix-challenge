@@ -1,6 +1,5 @@
 package phenix.model
 
-import java.nio.file.Path
 import java.time.LocalDate
 
 case class Transaction(transactionId: Int, shopUuid: String, productId: Int, quantity: Int)

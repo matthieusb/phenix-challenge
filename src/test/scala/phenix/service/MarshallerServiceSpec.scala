@@ -1,9 +1,11 @@
 package phenix.service
 
 import java.nio.file.Paths
+import java.time.LocalDate
 
 import org.scalatest.{FlatSpec, Matchers}
-import phenix.model.{Product, Products, Transaction, Transactions}
+import phenix.model._
+import phenix.service.TransactionMarshaller.CARREFOUR_FILENAME_DATE_FORMAT
 
 import scala.util.Try
 
@@ -30,9 +32,23 @@ class MarshallerServiceSpec extends FlatSpec with Matchers {
     transactions.get.transactions should contain (Transaction(1, "2a4b6b81-5aa2-4ad8-8ba9-ae1a006e7d71", 531, 5))
     transactions.get.transactions should contain (Transaction(3818, "72a2876c-bc8b-4f35-8882-8d661fac2606", 989, 4))
     transactions.get.transactions should contain (Transaction(9999, "10f2f3e6-f728-41f3-b079-43b0aa758292", 703, 1))
+  }
 
+  "The Transaction FileName Marshaller" should "return an error when filename is not correct" in {
+    // PREPARE/EXECUTE
+    val txMetadata: Try[TransactionFileMetaData] = TransactionMarshaller.marshallFileName(Paths.get("tra''((ggd__nsactions_20170514gfdhk.data"))
 
-    transactions.get.metaData.date.toString shouldBe "2017-05-14"
+    // ASSERT
+    txMetadata.isFailure shouldBe true
+  }
+
+  "The Transaction FileName Marshaller" should "return a marshalled value when filename is correct" in {
+    // PREPARE/EXECUTE
+    val txMetadata: Try[TransactionFileMetaData] = TransactionMarshaller.marshallFileName(Paths.get("transactions_20170514.data"))
+
+    // ASSERT
+    txMetadata.isSuccess shouldBe true
+    txMetadata.get.date.toString shouldBe "2017-05-14"
   }
 
   "The Product File Marshaller" should "return an error when file is not found" in {
@@ -54,8 +70,23 @@ class MarshallerServiceSpec extends FlatSpec with Matchers {
     products.get.products should contain (Product(1, 4.7))
     products.get.products should contain (Product(500, 34.86))
     products.get.products should contain (Product(999, 0.68))
+  }
 
-    products.get.metaData.shopUuid shouldBe "2a4b6b81-5aa2-4ad8-8ba9-ae1a006e7d71"
-    products.get.metaData.date.toString shouldBe "2017-05-14"
+  "The Product FileName Marshaller" should "return an error when filename is not correct" in {
+    // PREPARE/EXECUTE
+    val pxMetadata: Try[ProductFileMetaData] = ProductMarshaller.marshallFileName(Paths.get("referenprod__--shopuuid2_20170514.data"))
+
+    // ASSERT
+    pxMetadata.isFailure shouldBe true
+  }
+
+  "The Product FileName Marshaller" should "return a marshalled value when filename is correct" in {
+    // PREPARE/EXECUTE
+    val pxMetadata: Try[ProductFileMetaData] = ProductMarshaller.marshallFileName(Paths.get("reference_prod-shopuuid2_20170514.data"))
+
+    // ASSERT
+    pxMetadata.isSuccess shouldBe true
+    pxMetadata.get.date.toString shouldBe "2017-05-14"
+    pxMetadata.get.shopUuid shouldBe "shopuuid2"
   }
 }
