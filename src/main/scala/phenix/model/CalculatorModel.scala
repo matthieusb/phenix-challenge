@@ -9,7 +9,7 @@ case class ProductTurnover(productId: Int, turnover: Double) extends Ordered[Pro
   override def compare(pt2: ProductTurnover): Int = this.turnover compare pt2.turnover
 }
 
-trait Shop {
+abstract class Shop {
   val shopUuid: String
 }
 
