@@ -1,92 +1,61 @@
 package phenix.service
 
 import java.nio.file.Paths
-import java.time.LocalDate
 
 import org.scalatest.{FlatSpec, Matchers}
-import phenix.model._
-import phenix.service.TransactionMarshaller.CARREFOUR_FILENAME_DATE_FORMAT
-
-import scala.util.Try
+import phenix.model.{Transaction, _}
 
 
 class MarshallerServiceSpec extends FlatSpec with Matchers {
 
-  "The Transaction File Marshaller" should "return an error when file is not found" in {
+  "The Transaction File Marshaller" should "return a stream with the right transactions" in {
     // PREPARE/EXECUTE
-    val transactions: Try[Transactions] = TransactionMarshaller.marshallLines(Paths.get("not/an/existant/path/in/this/project"))
+    val transactions: Transactions = TransactionMarshaller.marshallLines(Stream(
+      "1|20170514T223544+0100|2a4b6b81-5aa2-4ad8-8ba9-ae1a006e7d71|531|5",
+      "3818|20170514T223544+0100|72a2876c-bc8b-4f35-8882-8d661fac2606|989|4",
+      "9999|20170514T223544+0100|10f2f3e6-f728-41f3-b079-43b0aa758292|703|1"
+    ), "transactions_20170514.data")
 
     // ASSERT
-    transactions.isFailure shouldBe true
-  }
-
-  "The Transaction File Marshaller" should "return a stream with the right transactions and correct file metadata" in {
-    // PREPARE/EXECUTE
-    val transactions: Try[Transactions] = TransactionMarshaller.marshallLines(Paths.get("data/input/example/transactions_20170514.data"))
-
-    // ASSERT
-    transactions.isSuccess shouldBe true
-
-    transactions.get.transactions should have size 45906
-
-    transactions.get.transactions should contain (Transaction(1, "2a4b6b81-5aa2-4ad8-8ba9-ae1a006e7d71", 531, 5))
-    transactions.get.transactions should contain (Transaction(3818, "72a2876c-bc8b-4f35-8882-8d661fac2606", 989, 4))
-    transactions.get.transactions should contain (Transaction(9999, "10f2f3e6-f728-41f3-b079-43b0aa758292", 703, 1))
-  }
-
-  "The Transaction FileName Marshaller" should "return an error when filename is not correct" in {
-    // PREPARE/EXECUTE
-    val txMetadata: Try[TransactionFileMetaData] = TransactionMarshaller.marshallFileName(Paths.get("tra''((ggd__nsactions_20170514gfdhk.data"))
-
-    // ASSERT
-    txMetadata.isFailure shouldBe true
+    transactions.transactions should have size 3
+    transactions.transactions should contain allOf(
+      Transaction(1, "2a4b6b81-5aa2-4ad8-8ba9-ae1a006e7d71", 531, 5),
+      Transaction(3818, "72a2876c-bc8b-4f35-8882-8d661fac2606", 989, 4),
+      Transaction(9999, "10f2f3e6-f728-41f3-b079-43b0aa758292", 703, 1)
+    )
   }
 
   "The Transaction FileName Marshaller" should "return a marshalled value when filename is correct" in {
     // PREPARE/EXECUTE
-    val txMetadata: Try[TransactionFileMetaData] = TransactionMarshaller.marshallFileName(Paths.get("transactions_20170514.data"))
+    val txMetadata: TransactionFileMetaData = TransactionMarshaller.marshallFileName("transactions_20170514.data")
 
     // ASSERT
-    txMetadata.isSuccess shouldBe true
-    txMetadata.get.date.toString shouldBe "2017-05-14"
+    txMetadata.date.toString shouldBe "2017-05-14"
   }
 
-  "The Product File Marshaller" should "return an error when file is not found" in {
+  "The Product File Marshaller" should "return a stream with the right products" in {
     // PREPARE/EXECUTE
-    val products: Try[Products] = ProductMarshaller.marshallLines(Paths.get("not/an/existant/path/in/this/project"))
+    val products: Products = ProductMarshaller.marshallLines(Stream(
+      "1|4.7",
+      "500|34.86",
+      "999|0.68"
+    ), "reference_prod-2a4b6b81-5aa2-4ad8-8ba9-ae1a006e7d71_20170514.data")
 
     // ASSERT
-    products.isFailure shouldBe true
-  }
-
-  "The Product File Marshaller" should "return a stream with the right products and correct file metadata" in {
-    // PREPARE/EXECUTE
-    val products: Try[Products] = ProductMarshaller.marshallLines(Paths.get("data/input/example/reference_prod-2a4b6b81-5aa2-4ad8-8ba9-ae1a006e7d71_20170514.data"))
-
-    // ASSERT
-    products.isSuccess shouldBe true
-
-    products.get.products should have size 999
-    products.get.products should contain (Product(1, 4.7))
-    products.get.products should contain (Product(500, 34.86))
-    products.get.products should contain (Product(999, 0.68))
-  }
-
-  "The Product FileName Marshaller" should "return an error when filename is not correct" in {
-    // PREPARE/EXECUTE
-    val pxMetadata: Try[ProductFileMetaData] = ProductMarshaller.marshallFileName(Paths.get("referenprod__--shopuuid2_20170514.data"))
-
-    // ASSERT
-    pxMetadata.isFailure shouldBe true
+    products.products should have size 3
+    products.products should contain allOf(
+      Product(1, 4.7),
+      Product(500, 34.86),
+      Product(999, 0.68)
+    )
   }
 
   "The Product FileName Marshaller" should "return a marshalled value when filename is correct" in {
     // PREPARE/EXECUTE
-    val pxMetadata: Try[ProductFileMetaData] = ProductMarshaller.marshallFileName(Paths.get("reference_prod-shopuuid2_20170514.data"))
+    val pxMetadata: ProductFileMetaData = ProductMarshaller.marshallFileName("reference_prod-shopuuid2_20170514.data")
 
     // ASSERT
-    pxMetadata.isSuccess shouldBe true
-    pxMetadata.get.date.toString shouldBe "2017-05-14"
-    pxMetadata.get.shopUuid shouldBe "shopuuid2"
+    pxMetadata.date.toString shouldBe "2017-05-14"
+    pxMetadata.shopUuid shouldBe "shopuuid2"
   }
 }
