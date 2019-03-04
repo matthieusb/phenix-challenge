@@ -42,15 +42,15 @@ object Orchestrator extends LazyLogging {
 //        ).toStream
 //        lazy val transactionFileName = "data/input/example/transactions_20170514.data"
 
-    val transactions = TransactionMarshaller.marshallLines(Paths.get(transactionFileName))
-    transactions.map(transactions => {
-      val productsStream = productFileNames.map(productFileName => {
-        ProductMarshaller.marshallLines(Paths.get(productFileName)).get
-      })
-
-      val sortedDayKpiResults = CompleteDayKpi.sortDayKpiResults(IndicatorCalculator.computeDayKpi(transactions, productsStream))
-      FileOrchestrator.outputCompleteDayKpi(arguments, sortedDayKpiResults) // TODO Add truncated results
-    })
+//    val transactions = TransactionMarshaller.marshallLines(Paths.get(transactionFileName))
+//    transactions.map(transactions => {
+//      val productsStream = productFileNames.map(productFileName => {
+//        ProductMarshaller.marshallLines(Paths.get(productFileName)).get
+//      })
+//
+//      val sortedDayKpiResults = CompleteDayKpi.sortDayKpiResults(IndicatorCalculator.computeDayKpi(transactions, productsStream))
+//      FileOrchestrator.outputCompleteDayKpi(arguments, sortedDayKpiResults) // TODO Add truncated results
+//    })
   }
 }
 

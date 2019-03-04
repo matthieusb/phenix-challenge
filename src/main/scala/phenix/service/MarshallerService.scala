@@ -8,30 +8,46 @@ import phenix.model._
 
 import scala.util.{Failure, Success, Try}
 
-trait Marshaller[T, U] extends FileIngester {
+trait Marshaller[T, U] extends FileService {
   val CARREFOUR_HORIZONTAL_SEPARATOR: String = """\|"""
-  val CARREFOUR_FILENAME_DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
-  val CARREFOUR_FILE_METADATA_SEPARATOR: String = "_"
 
-  def marshallFile(filePath: Path, deserializeFunction: String => U): Try[Stream[U]] = {
-    ingestRecordFile(filePath) match {
-      case Success(lines) => Success(lines.map(line => deserializeFunction(line)))
-      case Failure(throwable) => Failure(throwable)
-    }
+
+  /**
+    * Transforms the line by line strings of a file to the desired input model
+    * @param fileContent the line by line file content
+    * @param deserializeFunction the function used to transform each String to a model
+    * @return a stream of correctly marshalled case classes
+    */
+  def marshallFileContent(fileContent: Stream[String], deserializeFunction: String => U): Stream[U] = {
+    fileContent.map(line => deserializeFunction(line))
   }
 
-  def marshallLines(filePath: Path): Try[T]
+  def marshallLines(fileContent: Stream[String], fileName: String): T
 
   // NOTE: For now this method should not consider any possible errors in the source data
   def marshallLineString(line: String): U
 }
 
 trait FileNameMarshaller[T] {
-  // NOTE: For now this method should not consider any possible errors in the source filename
-  def marshallFileName(filePath: Path): Try[T]
+  val CARREFOUR_FILENAME_DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
+  val CARREFOUR_FILE_METADATA_SEPARATOR: String = "_"
+
+  /**
+    * Extracts data from a data filename. Does not handle possible errors in filename.
+    *
+    * @param filename a VALID transaction or product filename
+    *
+    * @return meta data coming from the filename
+    */
+  def marshallFileName(fileName: String): T
 }
 
 object TransactionMarshaller extends Marshaller[Transactions, Transaction] with FileNameMarshaller[TransactionFileMetaData] {
+
+  override def marshallLines(fileContent: Stream[String], fileName: String): Transactions = {
+    Transactions(marshallFileContent(fileContent, marshallLineString), marshallFileName(fileName))
+  }
+
   override def marshallLineString(line: String): Transaction = {
     line.split(CARREFOUR_HORIZONTAL_SEPARATOR) match {
       case Array(transactionId, _, shopUuid, productId, quantity) =>
@@ -39,21 +55,10 @@ object TransactionMarshaller extends Marshaller[Transactions, Transaction] with 
     }
   }
 
-  override def marshallLines(filePath: Path): Try[Transactions] = {
-    (marshallFile(filePath, marshallLineString), marshallFileName(filePath)) match {
-      case (Success(transactionStream), Success(transactionMetaData)) => Success(Transactions(transactionStream, transactionMetaData))
-      case (Failure(throwable), Success(_)) => Failure(new IllegalArgumentException(throwable.getMessage))
-      case (Success(_), Failure(throwable)) => Failure(new IllegalArgumentException(throwable.getMessage))
-      case (Failure(throwableStream), Failure(throwableMetadata)) => Failure(new IllegalArgumentException(s"Erreurs multiples: $throwableStream ; $throwableMetadata"))
-    }
-  }
-
-  override def marshallFileName(filePath: Path): Try[TransactionFileMetaData] = {
-    val transactionFileName = filePath.getFileName.toString
-      .replaceFirst(CARREFOUR_DATA_FILE_EXTENSION, "")
-    transactionFileName.split(CARREFOUR_FILE_METADATA_SEPARATOR) match {
-      case Array(_, dateStr) => Success(TransactionFileMetaData(LocalDate.parse(dateStr, CARREFOUR_FILENAME_DATE_FORMAT)))
-      case _ => Failure(new IllegalArgumentException(s"Nom du fichier de transaction invalides: $transactionFileName"))
+  override def marshallFileName(fileName: String): TransactionFileMetaData = {
+    fileName.replaceFirst(CARREFOUR_DATA_FILE_EXTENSION, "")
+      .split(CARREFOUR_FILE_METADATA_SEPARATOR) match {
+      case Array(_, dateStr) => TransactionFileMetaData(LocalDate.parse(dateStr, CARREFOUR_FILENAME_DATE_FORMAT))
     }
   }
 }
@@ -61,29 +66,22 @@ object TransactionMarshaller extends Marshaller[Transactions, Transaction] with 
 object ProductMarshaller extends Marshaller[Products, Product] with FileNameMarshaller[ProductFileMetaData] {
   val CARREFOUR_PRODUCT_FILE_PREFIX = "reference_prod-"
 
+  override def marshallLines(fileContent: Stream[String], fileName: String): Products = {
+    Products(marshallFileContent(fileContent, marshallLineString), marshallFileName(fileName))
+  }
+
   override def marshallLineString(line: String): Product = {
     line.split(CARREFOUR_HORIZONTAL_SEPARATOR) match {
       case Array(productId, price) => Product(productId.toInt, price.toDouble)
     }
   }
 
-  override def marshallLines(filePath: Path): Try[Products] = {
-    (marshallFile(filePath, marshallLineString), marshallFileName(filePath)) match {
-      case (Success(productStream), Success(productsMetaData)) => Success(Products(productStream, productsMetaData))
-      case (Failure(throwable), Success(_)) => Failure(new IllegalArgumentException(throwable.getMessage))
-      case (Success(_), Failure(throwable)) => Failure(new IllegalArgumentException(throwable.getMessage))
-      case (Failure(throwableStream), Failure(throwableMetadata)) => Failure(new IllegalArgumentException(s"Erreurs multiples: $throwableStream ; $throwableMetadata"))
-    }
-  }
-
-  override def marshallFileName(filePath: Path): Try[ProductFileMetaData] = {
-    val productFileName = filePath.getFileName.toString
-    productFileName
+  override def marshallFileName(fileName: String): ProductFileMetaData = {
+    fileName
       .replaceFirst(CARREFOUR_PRODUCT_FILE_PREFIX, "")
       .replaceFirst(CARREFOUR_DATA_FILE_EXTENSION, "")
       .split(CARREFOUR_FILE_METADATA_SEPARATOR) match {
-      case Array(shopUuid, dateStr) => Success(ProductFileMetaData(shopUuid, LocalDate.parse(dateStr, CARREFOUR_FILENAME_DATE_FORMAT)))
-      case _ => Failure(new IllegalArgumentException(s"Nom du fichier de produits invalide $productFileName"))
+      case Array(shopUuid, dateStr) => ProductFileMetaData(shopUuid, LocalDate.parse(dateStr, CARREFOUR_FILENAME_DATE_FORMAT))
     }
   }
 }
