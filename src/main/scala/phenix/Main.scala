@@ -3,6 +3,7 @@ package phenix
 import java.nio.file.Paths
 
 import phenix.model.{ArgumentsConfig, FolderArguments}
+import phenix.orchestrator.Orchestrator
 
 object Main extends App {
   val argumentsConf = new ArgumentsConfig(args)

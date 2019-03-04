@@ -74,13 +74,23 @@ trait FileNameService[T] {
   val TOP100_PREFIX = "top_100"
   val TOP100_GLOBAL = "GLOBAL"
   val TOP100_PREFIX_CATEGORY = s"${TOP100_PREFIX}_default"
+  val EXTENSION = ".data"
+  val J7_SUFFIX = "-J7"
 
-  def generateDayByShopFileName(date: LocalDate, shopUuid: String) : String = {
-    s"${TOP100_PREFIX_CATEGORY}_${shopUuid}_${date.format(TransactionMarshaller.CARREFOUR_FILENAME_DATE_FORMAT)}"
+  def generateDayShopFileName(date: LocalDate, shopUuid: String) : String = {
+    s"${TOP100_PREFIX_CATEGORY}_${shopUuid}_${date.format(TransactionMarshaller.CARREFOUR_FILENAME_DATE_FORMAT)}$EXTENSION"
+  }
+
+  def generateWeekShopFileName(date: LocalDate, shopUuid: String) : String = {
+    s"${TOP100_PREFIX_CATEGORY}_${shopUuid}_${date.format(TransactionMarshaller.CARREFOUR_FILENAME_DATE_FORMAT)}$J7_SUFFIX$EXTENSION"
   }
 
   def generateDayGlobalFileName(date: LocalDate) : String = {
-    s"${TOP100_PREFIX_CATEGORY}_${TOP100_GLOBAL}_${date.format(TransactionMarshaller.CARREFOUR_FILENAME_DATE_FORMAT)}"
+    s"${TOP100_PREFIX_CATEGORY}_${TOP100_GLOBAL}_${date.format(TransactionMarshaller.CARREFOUR_FILENAME_DATE_FORMAT)}$EXTENSION"
+  }
+
+  def generateWeekGlobalFileName(date: LocalDate) : String = {
+    s"${TOP100_PREFIX_CATEGORY}_${TOP100_GLOBAL}_${date.format(TransactionMarshaller.CARREFOUR_FILENAME_DATE_FORMAT)}$J7_SUFFIX$EXTENSION"
   }
 }
 

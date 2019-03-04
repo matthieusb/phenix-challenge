@@ -12,12 +12,12 @@ import phenix.model._
 object DayKpiCalculator extends LazyLogging with Calculator {
 
   /**
-    * TODO Documentation
+    * Calls all the calculations to get results for one day.
     *
     * WARNING: this does not handle sorting. The values here are streams and not ordered, you'll have to do it before you output them to files.
     *
-    * @param dayTransactions
-    * @param dayProductsList
+    * @param dayTransactions the transactions for the day
+    * @param dayProductsList the associated products (associating should be done prior to this method)
     * @return
     */
   def computeDayKpi(dayTransactions: Transactions, dayProductsList: Stream[Products]): CompleteDayKpi = {
@@ -27,12 +27,12 @@ object DayKpiCalculator extends LazyLogging with Calculator {
 
     val dayShopSales = productKpiMapByShop.keys.map(shopUuid => {
       val productSaleExtract = productKpiMapByShop(shopUuid).map(productDataTuple => productDataTuple._1)
-      DayShopSale(shopUuid, productSaleExtract)
+      ShopSale(shopUuid, productSaleExtract)
     }).toStream
 
     val dayShopTurnovers = productKpiMapByShop.keys.map(shopUuid => {
       val productSaleExtract = productKpiMapByShop(shopUuid).map(productDataTuple => productDataTuple._2)
-      DayShopTurnover(shopUuid, productSaleExtract)
+      ShopTurnover(shopUuid, productSaleExtract)
     }).toStream
 
     val dayGlobalSale = computeGlobalDaySales(dayTransactions.metaData.date, dayShopSales)
@@ -41,18 +41,11 @@ object DayKpiCalculator extends LazyLogging with Calculator {
     CompleteDayKpi(dayTransactions.metaData.date, dayShopSales, dayGlobalSale, dayShopTurnovers, dayGlobalTurnover)
   }
 
-  /**
-    * TODO Documentation
-    * @param date
-    * @param dayShopSales
-    * @return
-    */
-  def computeGlobalDaySales(date: LocalDate, dayShopSales: Stream[DayShopSale]): DayGlobalSale = {
+  def computeGlobalDaySales(date: LocalDate, dayShopSales: Stream[ShopSale]): GlobalSale = {
     logger.info(s"Calculating global sales number for $date")
 
-    val aggregatedProductSales = dayShopSales.flatMap(dayShopSale => {
-      dayShopSale.productSales
-    })
+    val aggregatedProductSales = dayShopSales
+      .flatMap(dayShopSale => dayShopSale.productSales)
       .groupBy(productSale => productSale.productId)
       .mapValues(productSale => {
         productSale.foldLeft(0)((acc, productSale2) => acc + productSale2.quantity)
@@ -60,21 +53,14 @@ object DayKpiCalculator extends LazyLogging with Calculator {
       ProductSale(globalResultMap._1, globalResultMap._2)
     })
 
-    DayGlobalSale(aggregatedProductSales.toStream)
+    GlobalSale(aggregatedProductSales.toStream)
   }
 
-  /**
-    * TODO Documentation
-    * @param date
-    * @param dayShopTurnovers
-    * @return
-    */
-  def computeGlobalDayTurnover(date: LocalDate, dayShopTurnovers: Stream[DayShopTurnover]): DayGlobalTurnover = {
+  def computeGlobalDayTurnover(date: LocalDate, dayShopTurnovers: Stream[ShopTurnover]): GlobalTurnover = {
     logger.info(s"Calculating global turnover for $date")
 
-    val aggregateProductTurnovers = dayShopTurnovers.flatMap(dayShopTurnover => {
-      dayShopTurnover.productTurnovers
-    })
+    val aggregateProductTurnovers = dayShopTurnovers
+      .flatMap(dayShopTurnover => dayShopTurnover.productTurnovers)
       .groupBy(productTurnover => productTurnover.productId)
       .mapValues(productTurnover => {
         productTurnover.foldLeft(0.0)((acc, productTurnover2) => acc + productTurnover2.turnover)
@@ -82,16 +68,9 @@ object DayKpiCalculator extends LazyLogging with Calculator {
       ProductTurnover(globalResultMap._1, globalResultMap._2)
     })
 
-    DayGlobalTurnover(aggregateProductTurnovers.toStream)
+    GlobalTurnover(aggregateProductTurnovers.toStream)
   }
 
-  /**
-    * TODO Documentation
-    *
-    * @param dayTransactions
-    * @param dayProductsList
-    * @return
-    */
   def computeProductDayKpiByShop(dayTransactions: Transactions, dayProductsList: Stream[Products]): Map[String, Stream[(ProductSale, ProductTurnover)]] = {
     logger.info(s"Calculating global KPI (Sales, Turnover) for date ${dayTransactions.metaData.date}")
 

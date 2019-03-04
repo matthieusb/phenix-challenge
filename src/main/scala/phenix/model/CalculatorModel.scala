@@ -13,29 +13,54 @@ abstract class Shop {
   val shopUuid: String
 }
 
-case class DayShopSale(shopUuid: String, productSales: Stream[ProductSale]) extends Shop
-case class DayGlobalSale(productSales: Stream[ProductSale])
-
-case class DayShopTurnover(shopUuid: String, productTurnovers: Stream[ProductTurnover]) extends Shop
-case class DayGlobalTurnover(productTurnovers: Stream[ProductTurnover])
-
-case class CompleteDayKpi(date: LocalDate, dayShopSales: Stream[DayShopSale], dayGlobalSales: DayGlobalSale,
-                          dayShopTurnovers: Stream[DayShopTurnover], dayGlobalTurnover: DayGlobalTurnover)
-
-object CompleteDayKpi {
-  def sortDayKpiResults(completeDayKpi: CompleteDayKpi): CompleteDayKpi = {
-    completeDayKpi.copy(
-    dayShopSales = completeDayKpi.dayShopSales.map(dayShopSale => {
-      dayShopSale.copy(productSales = dayShopSale.productSales.sorted.reverse)
-    }),
-    dayGlobalSales = completeDayKpi.dayGlobalSales.copy(productSales = completeDayKpi.dayGlobalSales.productSales.sorted.reverse),
-
-    dayShopTurnovers = completeDayKpi.dayShopTurnovers.map(dayShopTurnover => {
-      dayShopTurnover.copy(productTurnovers = dayShopTurnover.productTurnovers.sorted.reverse)
-    }),
-    dayGlobalTurnover = completeDayKpi.dayGlobalTurnover.copy(productTurnovers = completeDayKpi.dayGlobalTurnover.productTurnovers.sorted.reverse)
-    )
+case class ShopSale(shopUuid: String, productSales: Stream[ProductSale]) extends Shop {
+  def sort(): ShopSale = {
+    this.copy(productSales = this.productSales.sorted.reverse)
   }
 }
 
-case class RangeDaykpi(dayKpis: Stream[CompleteDayKpi])
+case class GlobalSale(productSales: Stream[ProductSale]) {
+  def sort(): GlobalSale = {
+    this.copy(productSales = this.productSales.sorted.reverse)
+  }
+}
+
+case class ShopTurnover(shopUuid: String, productTurnovers: Stream[ProductTurnover]) extends Shop {
+  def sort(): ShopTurnover = {
+    this.copy(productTurnovers = this.productTurnovers.sorted.reverse)
+  }
+}
+
+case class GlobalTurnover(productTurnovers: Stream[ProductTurnover]) {
+  def sort(): GlobalTurnover = {
+    this.copy(productTurnovers = this.productTurnovers.sorted.reverse)
+  }
+}
+
+case class CompleteDayKpi(date: LocalDate, dayShopSales: Stream[ShopSale], dayGlobalSales: GlobalSale,
+                          dayShopTurnovers: Stream[ShopTurnover], dayGlobalTurnover: GlobalTurnover) {
+  def sortResults(): CompleteDayKpi = {
+    this.copy(
+      dayShopSales = this.dayShopSales.map(_.sort()),
+      dayGlobalSales = this.dayGlobalSales.sort(),
+      dayShopTurnovers = this.dayShopTurnovers.map(_.sort()),
+      dayGlobalTurnover = this.dayGlobalTurnover.sort()
+    )
+  }
+
+  // TODO Add the truncate method here
+}
+
+case class WeekKpi(lastDayDate: LocalDate, weekShopSales: Stream[ShopSale], weekGlobalSales: GlobalSale,
+                   weekShopTurnover: Stream[ShopTurnover], weekGlobalTurnover: GlobalTurnover) {
+  def sortResults(): WeekKpi = {
+    this.copy(
+      weekShopSales = this.weekShopSales.map(_.sort()),
+      weekGlobalSales = this.weekGlobalSales.sort(),
+      weekShopTurnover = this.weekShopTurnover.map(_.sort()),
+      weekGlobalTurnover = this.weekGlobalTurnover.sort()
+    )
+  }
+
+  // TODO Add truncate method
+}
