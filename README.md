@@ -1,6 +1,7 @@
 # phenix-challenge
 
 [![Build Status](https://travis-ci.org/matthieusb/phenix-challenge.svg?branch=master)](https://travis-ci.org/matthieusb/phenix-challenge)
+[![Coverage Status](https://coveralls.io/repos/github/matthieusb/phenix-challenge/badge.svg?branch=master)](https://coveralls.io/github/matthieusb/phenix-challenge?branch=master)
 
 Solution apportée au projet Carrefour https://github.com/Carrefour-Group/phenix-challenge
 
