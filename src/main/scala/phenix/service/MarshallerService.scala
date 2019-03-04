@@ -1,16 +1,12 @@
 package phenix.service
 
-import java.nio.file.Path
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 import phenix.model._
 
-import scala.util.{Failure, Success, Try}
-
 trait Marshaller[T, U] extends FileService {
   val CARREFOUR_HORIZONTAL_SEPARATOR: String = """\|"""
-
 
   /**
     * Transforms the line by line strings of a file to the desired input model
