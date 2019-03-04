@@ -63,7 +63,7 @@ object DayKpiCalculator extends LazyLogging with Calculator {
       .flatMap(dayShopTurnover => dayShopTurnover.productTurnovers)
       .groupBy(productTurnover => productTurnover.productId)
       .mapValues(productTurnover => {
-        productTurnover.foldLeft(0.0)((acc, productTurnover2) => acc + productTurnover2.turnover)
+        productTurnover.foldLeft(0.0)((acc, productTurnover2) => roundValue(acc + productTurnover2.turnover))
       }).map(globalResultMap => {
       ProductTurnover(globalResultMap._1, globalResultMap._2)
     })
