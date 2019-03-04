@@ -7,9 +7,9 @@ import phenix.model._
 
 
 /**
-  * Does the calculations to get indicators (sales, turnover) according to cases (one day, last 7 days).
+  * Does the calculations to get indicators (sales, turnover) according to cases for one day.
   */
-object IndicatorCalculator extends LazyLogging {
+object DayKpiCalculator extends LazyLogging with Calculator {
 
   /**
     * TODO Documentation
@@ -41,6 +41,12 @@ object IndicatorCalculator extends LazyLogging {
     CompleteDayKpi(dayTransactions.metaData.date, dayShopSales, dayGlobalSale, dayShopTurnovers, dayGlobalTurnover)
   }
 
+  /**
+    * TODO Documentation
+    * @param date
+    * @param dayShopSales
+    * @return
+    */
   def computeGlobalDaySales(date: LocalDate, dayShopSales: Stream[DayShopSale]): DayGlobalSale = {
     logger.info(s"Calculating global sales number for $date")
 
@@ -57,6 +63,12 @@ object IndicatorCalculator extends LazyLogging {
     DayGlobalSale(aggregatedProductSales.toStream)
   }
 
+  /**
+    * TODO Documentation
+    * @param date
+    * @param dayShopTurnovers
+    * @return
+    */
   def computeGlobalDayTurnover(date: LocalDate, dayShopTurnovers: Stream[DayShopTurnover]): DayGlobalTurnover = {
     logger.info(s"Calculating global turnover for $date")
 
@@ -75,6 +87,7 @@ object IndicatorCalculator extends LazyLogging {
 
   /**
     * TODO Documentation
+    *
     * @param dayTransactions
     * @param dayProductsList
     * @return
@@ -101,8 +114,6 @@ object IndicatorCalculator extends LazyLogging {
     })
   }
 
-  def roundValue(numberToRound: Double): Double = Math.round(numberToRound * 100.0) / 100.0
-
   /**
     * Given a shop uuid and a products list, this function returns the correct product price.
     * If the product price is not found for this shop, returns 0.
@@ -121,5 +132,4 @@ object IndicatorCalculator extends LazyLogging {
       case None => 0.0
     }
   }
-
 }

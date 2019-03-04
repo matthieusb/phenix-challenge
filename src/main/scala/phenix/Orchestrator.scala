@@ -3,7 +3,7 @@ package phenix
 import java.nio.file.Path
 
 import com.typesafe.scalalogging.LazyLogging
-import phenix.calculator.IndicatorCalculator
+import phenix.calculator.DayKpiCalculator
 import phenix.model._
 import phenix.service._
 import scalaz.std.stream.streamSyntax._
@@ -17,6 +17,12 @@ import scalaz.std.stream.streamSyntax._
   */
 object FileOrchestrator extends LazyLogging with FileIngester with FileProducer with FileNameChecker {
 
+  /**
+    * TODO Documentation
+    *
+    * @param arguments
+    * @return
+    */
   def determineInputFiles(arguments: FolderArguments): InputFiles  = {
     val inputFilesList = arguments
       .inputFolder.toFile.listFiles().toStream
@@ -30,6 +36,12 @@ object FileOrchestrator extends LazyLogging with FileIngester with FileProducer 
     InputFiles(inputTransactionsList, inputProductsList)
   }
 
+  /**
+    * TODO Documentation
+    *
+    * @param inputFiles
+    * @return
+    */
   def convertInputFilesToMarshalledValues(inputFiles: InputFiles): (Stream[Transactions], Stream[Products]) = {
     val transactions = inputFiles.inputTransactionsFiles.map(inputTransactionFile => {
       TransactionMarshaller.marshallLines(ingestRecordFile(inputTransactionFile.toPath.toAbsolutePath), inputTransactionFile.getName)
@@ -42,6 +54,12 @@ object FileOrchestrator extends LazyLogging with FileIngester with FileProducer 
     (transactions, products)
   }
 
+  /**
+    * TODO Documentation
+    *
+    * @param outputFolder
+    * @param completeDayKpi
+    */
   def outputCompleteDayKpi(outputFolder: Path, completeDayKpi: CompleteDayKpi): Unit = {
     val dayShopSalesFileOutput = completeDayKpi.dayShopSales.map(dayShopSale => {
       FileOutput(ProductSaleFileNameService.generateDayByShopFileName(completeDayKpi.date, dayShopSale.shopUuid),
@@ -67,6 +85,10 @@ object FileOrchestrator extends LazyLogging with FileIngester with FileProducer 
     outputKpis(KpiOutput(outputFolder, completeFileOutputs))
   }
 
+  /**
+    * TODO Documentation
+    * @param kpiOutput
+    */
   def outputKpis(kpiOutput: KpiOutput): Unit = {
     kpiOutput.fileOutputs.foreach(fileOutput => {
       writeRecordFile(
@@ -98,7 +120,7 @@ object Orchestrator extends LazyLogging {
         val marshalledGroupedRecords = groupSortMarshalledInputValuesByDate(FileOrchestrator.convertInputFilesToMarshalledValues(inputFiles))
 
          val allCompleteDayKpi = marshalledGroupedRecords.keys.map(transactionsKey => {
-          CompleteDayKpi.sortDayKpiResults(IndicatorCalculator.computeDayKpi(transactionsKey, marshalledGroupedRecords(transactionsKey)))
+          CompleteDayKpi.sortDayKpiResults(DayKpiCalculator.computeDayKpi(transactionsKey, marshalledGroupedRecords(transactionsKey)))
         }).toStream
 
         allCompleteDayKpi.foreach(sortedCompleteDayKpi => {
@@ -110,17 +132,14 @@ object Orchestrator extends LazyLogging {
       }
     }
 
-    //    val transactions = TransactionMarshaller.marshallLines(Paths.get(transactionFileName))
-    //    transactions.map(transactions => {
-    //      val productsStream = productFileNames.map(productFileName => {
-    //        ProductMarshaller.marshallLines(Paths.get(productFileName)).get
-    //      })
-    //
-    //      val sortedDayKpiResults = CompleteDayKpi.sortDayKpiResults(IndicatorCalculator.computeDayKpi(transactions, productsStream))
-    //      FileOrchestrator.outputCompleteDayKpi(arguments, sortedDayKpiResults) // TODO Add truncated results
-    //    })
   }
 
+  /**
+    * TODO Documentation
+    *
+    * @param marshalledInputRecords
+    * @return
+    */
   def groupSortMarshalledInputValuesByDate(marshalledInputRecords: (Stream[Transactions], Stream[Products])): Map[Transactions, Stream[Products]] = {
     val transactionsRecords = marshalledInputRecords._1
     val productsRecords = marshalledInputRecords._2
