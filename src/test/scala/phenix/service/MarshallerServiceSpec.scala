@@ -1,7 +1,5 @@
 package phenix.service
 
-import java.nio.file.Paths
-
 import org.scalatest.{FlatSpec, Matchers}
 import phenix.model.{Transaction, _}
 

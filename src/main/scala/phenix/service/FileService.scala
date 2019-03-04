@@ -7,10 +7,24 @@ import better.files._
 import com.typesafe.scalalogging.LazyLogging
 import phenix.model.{ProductSale, ProductTurnover}
 
+import scala.util.matching.Regex
 import scala.util.{Failure, Success, Try}
 
 trait FileService {
   val CARREFOUR_DATA_FILE_EXTENSION = """.data"""
+}
+
+trait FileNameChecker {
+  val TRANSACTION_FILENAME_PATTERN: Regex = """^transactions\_[0-9]{8}\.data$""".r
+  val PRODUCT_FILENAME_PATTERN: Regex = """^reference\_prod\-(.*)\_[0-9]{8}\.data$""".r
+
+  def fileIsTransactionRecord(fileName: String): Boolean = {
+    TRANSACTION_FILENAME_PATTERN.findFirstIn(fileName).isDefined
+  }
+
+  def fileIsProductRecord(fileName: String): Boolean = {
+    PRODUCT_FILENAME_PATTERN.findFirstIn(fileName).isDefined
+  }
 }
 
 /**
@@ -45,17 +59,14 @@ trait FileIngester extends FileService with LazyLogging {
   /**
     * Ingests file content line by line, except if the file does not exist.
     *
-    * @param filePath the file you want to
+    * @param filePath the file you want to ingest, HAS to exist !
     * @return a string stream containing each line if the file is found, or an error
     */
-  def ingestRecordFile(filePath: Path): Try[Stream[String]] = {
-    logger.info(s"Ingest record file ${filePath.toAbsolutePath}")
+  def ingestRecordFile(filePath: Path): Stream[String] = {
+    logger.info(s"Ingesting record file ${filePath.toAbsolutePath}")
     val fileToIngest = File(filePath.toString)
 
-    if (fileToIngest.exists)
-      Success(fileToIngest.lineIterator.toStream)
-    else
-      Failure(new IllegalArgumentException(s"Fichier ${filePath.toAbsolutePath} introuvable"))
+    fileToIngest.lineIterator.toStream
   }
 }
 
