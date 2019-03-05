@@ -108,14 +108,21 @@ object FileOrchestrator extends LazyLogging with FileIngester with FileProducer 
     mergeAndOutputAllStreams(outputFolder, dayShopSalesFileOutput, dayGlobalSaleOutput, dayShopTurnoversFileOutput, dayGlobalTurnoverOutput)
   }
 
-  def outputWeekKpi(outputFolder: Path, weekKpi: CompleteWeekKpi): Unit = {
+  /**
+    * onverts and Writes a CompleteWeekKpi to the necessary files.
+    * Each stream of results is truncated to the top 100 before being outputted
+    *
+    * @param outputFolder the folder the files will be written to
+    * @param completeWeekKpi valid COmpleteweekKpi
+    */
+  def outputWeekKpi(outputFolder: Path, completeWeekKpi: CompleteWeekKpi): Unit = {
     val weekShopSalesFileOutput = FileOutputProductSaleOrchestrator
-      .generateShopOutput(weekKpi.lastDayDate, weekKpi.weekShopSales, ProductTurnoverFileNameService.generateWeekShopFileName)
-    val weekGlobalSaleOutput = FileOutputProductSaleOrchestrator.generatGlobalOutput(weekKpi.lastDayDate, weekKpi.weekGlobalSales, ProductTurnoverFileNameService.generateWeekGlobalFileName)
+      .generateShopOutput(completeWeekKpi.lastDayDate, completeWeekKpi.weekShopSales, ProductTurnoverFileNameService.generateWeekShopFileName)
+    val weekGlobalSaleOutput = FileOutputProductSaleOrchestrator.generatGlobalOutput(completeWeekKpi.lastDayDate, completeWeekKpi.weekGlobalSales, ProductTurnoverFileNameService.generateWeekGlobalFileName)
 
     val weekShopTurnoverOutput =
-      FileOutputProductTurnoverOrchestrator.generateShopOutput(weekKpi.lastDayDate, weekKpi.weekShopTurnover, ProductTurnoverFileNameService.generateWeekShopFileName)
-    val weekGlobalTurnoverOutput = FileOutputProductTurnoverOrchestrator.generatGlobalOutput(weekKpi.lastDayDate, weekKpi.weekGlobalTurnover, ProductTurnoverFileNameService.generateWeekGlobalFileName)
+      FileOutputProductTurnoverOrchestrator.generateShopOutput(completeWeekKpi.lastDayDate, completeWeekKpi.weekShopTurnover, ProductTurnoverFileNameService.generateWeekShopFileName)
+    val weekGlobalTurnoverOutput = FileOutputProductTurnoverOrchestrator.generatGlobalOutput(completeWeekKpi.lastDayDate, completeWeekKpi.weekGlobalTurnover, ProductTurnoverFileNameService.generateWeekGlobalFileName)
 
     mergeAndOutputAllStreams(outputFolder, weekShopSalesFileOutput, weekGlobalSaleOutput, weekShopTurnoverOutput, weekGlobalTurnoverOutput)
   }
