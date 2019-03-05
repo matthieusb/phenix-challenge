@@ -24,4 +24,15 @@ class ArgumentsConfig(arguments: Seq[String]) extends ScallopConf(arguments) {
   verify()
 }
 
-case class FolderArguments(inputFolder: Path, outputFolder: Path, simpleCalc: Boolean)
+case class FolderArguments(inputFolder: Path, outputFolder: Path, simpleCalc: Boolean) {
+  /**
+    * Alternative constructor using argumentsConfig directly.
+    * @param argumentsConfig VALIDATED scallop arguments config
+    * @return
+    */
+  def this(argumentsConfig: ArgumentsConfig) = this (
+    Paths.get(argumentsConfig.inputFolder()),
+    Paths.get(argumentsConfig.outputFolder()),
+    argumentsConfig.simpleCalc()
+  )
+}

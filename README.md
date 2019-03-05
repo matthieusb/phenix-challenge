@@ -24,7 +24,7 @@ java -jar votrejar.jar -i chemin/dossier/donnees/entrantes -o chemin/dossier/don
 ```
 
 Le dossier en entrée est **obligatoire**, il doit contenir les fichiers de _transactions_ et de _reference produits_ dont vous souhaitez calculés les indicateurs.
-Si vous ne mentionnez pas le dossier en sortie, tout sera créé dans le dossier en cours.
+Si vous ne mentionnez pas le dossier en sortie, tout sera créé dans le dossier en cours sous le répertoire `phenix-output``.
 
 
 Pour le calcul des indicateurs sur les 7 derniers jours, la date du fichier le plus récent est prise en compte pour commencer les calculs, puis sont pris les 6 jours suivants disponibles dans le dossier. Si des jours sont manquants, le calcul se fait quand même normalement.
@@ -47,6 +47,8 @@ java -jar votrejar.jar -h
 * _Scala_ en version 2.12.8 
 * _Sbt_ en version 1.2.8
 
+Des fichiers sont disponibles dans le dossier data. Attention à créer des nouveaux dossiers si vous souhaitez ajouter des tests.
+
 ### Commandes sbt
 
 Rappel des commandes sbt pour le développement de l'application.
@@ -63,7 +65,7 @@ sbt test
 
 Lancement de l'application:
 ```
-sbt run
+sbt run -i input/folder -o output/folder
 ```
 
 Packaging:
