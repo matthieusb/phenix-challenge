@@ -35,7 +35,7 @@ sbt run
 
 Packaging:
 ```
-sbt package
+sbt assembly
 ```
 
 Note: ajouter "~" devant une commande pour la lancer en mode "watch"
