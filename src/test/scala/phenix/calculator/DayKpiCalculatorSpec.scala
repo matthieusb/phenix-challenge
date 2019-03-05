@@ -1,56 +1,11 @@
 package phenix.calculator
 
-import java.time.LocalDate
-
 import org.scalatest.{FlatSpec, Matchers}
-import phenix.model.{Product, ProductSale, _}
-import phenix.service.TransactionMarshaller
+import phenix.model.{ProductSale, _}
 
-class IndicatorCalculatorSpec extends FlatSpec with Matchers {
-  val dayDate: LocalDate = LocalDate.parse("20170514", TransactionMarshaller.CARREFOUR_FILENAME_DATE_FORMAT)
+class DayKpiCalculatorSpec extends FlatSpec with Matchers with CalculatorSpec {
 
-  // TODO Change the way dates are handled here, not working correctly for now
-
-  val (shopUuidOne, shopUuidTwo) = ("shopUuid1", "shopUuid2")
-  val (productIdOne, productIdTwo, productIdThree) = (1, 2, 3)
-
-  val transactionFileMetadata = TransactionFileMetaData(dayDate)
-  val productFileMetaDataShopOne = ProductFileMetaData(shopUuidOne, dayDate)
-  val productFileMetaDataShopTwo = ProductFileMetaData(shopUuidTwo, dayDate)
-
-  val transactionStream: Stream[Transaction] = List(
-    // Shop 1
-    Transaction(1, shopUuidOne, productIdOne, 2),
-    Transaction(5, shopUuidOne, productIdOne, 10),
-    Transaction(10, shopUuidOne, productIdTwo, 15),
-    Transaction(3, shopUuidOne, productIdThree, 1),
-    Transaction(9, shopUuidOne, productIdThree, 2),
-
-    // Shop 2
-    Transaction(2, shopUuidTwo, productIdTwo, 5),
-    Transaction(6, shopUuidTwo, productIdTwo, 8),
-    Transaction(7, shopUuidTwo, productIdTwo, 3),
-    Transaction(4, shopUuidTwo, productIdThree, 3),
-    Transaction(8, shopUuidTwo, productIdThree, 3)
-  ).toStream
-  val transactions = Transactions(transactionStream, transactionFileMetadata)
-
-  val productStreamShopOne: Stream[Product] = List(
-    Product(productIdOne, 12.2),
-    Product(productIdTwo, 2.6),
-    Product(productIdThree, 40.0)
-  ).toStream
-
-  val productStreamShopTwo: Stream[Product] = List(
-    Product(productIdOne, 1.3),
-    Product(productIdTwo, 12.4),
-    Product(productIdThree, 4.1)
-  ).toStream
-
-  val productsOne = Products(productStreamShopOne, productFileMetaDataShopOne)
-  val productsTwo = Products(productStreamShopTwo, productFileMetaDataShopTwo)
-
-  "The Indicator Calculator" should "output correct sales results" in {
+  "The Day Kpi Calculator" should "output correct sales results" in {
     // EXECUTE
     val dayKpiResult: CompleteDayKpi = DayKpiCalculator.computeDayKpi(transactions, List(productsOne, productsTwo).toStream)
 
@@ -79,7 +34,7 @@ class IndicatorCalculatorSpec extends FlatSpec with Matchers {
     dayKpiResult.dayGlobalSales.productSales should contain allOf (ProductSale(2, 31), ProductSale(1, 12), ProductSale(3, 9))
   }
 
-  "The Indicator Calculator" should "output correct turnover results" in {
+  "The Day Kpi Calculator" should "output correct turnover results" in {
     // EXECUTE
     val dayKpiResult: CompleteDayKpi = DayKpiCalculator.computeDayKpi(transactions, List(productsOne, productsTwo).toStream)
 
@@ -96,19 +51,19 @@ class IndicatorCalculatorSpec extends FlatSpec with Matchers {
     shop1ProductTuronovers.get should contain allOf (ProductTurnover(1, 146.4), ProductTurnover(3, 120.0), ProductTurnover(2, 39))
 
     // -- Tests on shop 2
-    val shop2ProductTuronovers = dayKpiResult.dayShopTurnovers
+    val shop2ProductTurnovers = dayKpiResult.dayShopTurnovers
       .find(dayShopTurnover => dayShopTurnover.shopUuid == shopUuidTwo)
       .map(dayShopTurnover => dayShopTurnover.productTurnovers)
 
-    shop2ProductTuronovers shouldBe defined
-    shop2ProductTuronovers.get should have size 2
-    shop2ProductTuronovers.get should contain allOf (ProductTurnover(3, 24.6), ProductTurnover(2, 198.4))
+    shop2ProductTurnovers shouldBe defined
+    shop2ProductTurnovers.get should have size 2
+    shop2ProductTurnovers.get should contain allOf (ProductTurnover(3, 24.6), ProductTurnover(2, 198.4))
 
     // -- Tests on global
     dayKpiResult.dayGlobalTurnover.productTurnovers should contain allOf (ProductTurnover(2, 237.4), ProductTurnover(1, 146.4), ProductTurnover(3, 144.6))
   }
 
-  "The Indicator calculator price getting method" should "get the right prices when they are present" in {
+  "The Day Kpi calculator price getting method" should "get the right prices when they are present" in {
     // PREPARE
     val dayProducts = List(productsOne, productsTwo).toStream
 
@@ -123,5 +78,15 @@ class IndicatorCalculatorSpec extends FlatSpec with Matchers {
     productTwoShopOnePrice shouldBe 2.6
   }
 
-  // TODO Add a case where the price product could not be found
+  "The Day Kpi calculator price getting method" should "get 0.0 as price if the product is not found" in {
+    // PREPARE
+    val dayProducts = List(productsOne, productsTwo).toStream
+
+    // EXECUTE
+    val incorrectProcutShopOnePrice: Double = DayKpiCalculator.getProductPriceFromProducts(11122121, shopUuidOne, dayProducts)
+
+
+    // ASSERT
+    incorrectProcutShopOnePrice shouldBe 0.0
+  }
 }

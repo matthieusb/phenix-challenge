@@ -11,9 +11,10 @@ import phenix.model._
   */
 object WeekKpiCalculator extends LazyLogging with Calculator {
   /**
-    * TODO Documentation
+    * Does the calculations for the last 7 days given.
+    * Per day calculations need to be done prior to this
     *
-    * @param completeDayKpis a Stream of only 7 CompleteDayKpis, should be filtered and sorted before so that the oldest date is a the top.
+    * @param completeDayKpis a Stream of 7 or less CompleteDayKpis, should be filtered before to avoid having too many or irrelevant dates.
     */
   def computeWeekKpi(lastDayDate: LocalDate, completeDayKpis: Stream[CompleteDayKpi]): CompleteWeekKpi = {
     val allShopSales = completeDayKpis.flatMap(completeDayKpi =>  completeDayKpi.dayShopSales)
