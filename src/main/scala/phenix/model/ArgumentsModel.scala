@@ -13,6 +13,8 @@ class ArgumentsConfig(arguments: Seq[String]) extends ScallopConf(arguments) {
 
   val outputFolder: ScallopOption[String] = opt[String](default = Some("phenix-output"), descr = "The folder where you want the results files to go. If not mentioned, will put the results in ./phenix-output")
 
+  val simpleCalc: ScallopOption[Boolean] = opt[Boolean](default = Some(false), descr = "Week calculations won't be triggered if this flag is set")
+
   def checkFolderExistence(path: String): Boolean = {
     Paths.get(path).toAbsolutePath
       .toFile
@@ -22,4 +24,4 @@ class ArgumentsConfig(arguments: Seq[String]) extends ScallopConf(arguments) {
   verify()
 }
 
-case class FolderArguments(inputFolder: Path, outputFolder: Path)
+case class FolderArguments(inputFolder: Path, outputFolder: Path, simpleCalc: Boolean)

@@ -1,6 +1,7 @@
 package phenix
 
 import org.scalatest.{FlatSpec, Matchers}
+import phenix.orchestrator.FileOrchestrator
 
 class OrchestratorSpec extends FlatSpec with Matchers {
   "The File Orchestrator FileName checker" should "return false results with invalid transactions and products file names" in {

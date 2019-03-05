@@ -16,4 +16,6 @@ case class Transactions(transactions: Stream[Transaction], metaData: Transaction
   override def compare(ts2: Transactions): Int = this.metaData.date compareTo ts2.metaData.date
 }
 
+
+
 case class Products(products: Stream[Product], metaData: ProductFileMetaData)

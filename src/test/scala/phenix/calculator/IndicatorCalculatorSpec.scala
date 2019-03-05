@@ -52,7 +52,7 @@ class IndicatorCalculatorSpec extends FlatSpec with Matchers {
 
   "The Indicator Calculator" should "output correct sales results" in {
     // EXECUTE
-    val dayKpiResult: CompleteDayKpi = IndicatorCalculator.computeDayKpi(transactions, List(productsOne, productsTwo).toStream)
+    val dayKpiResult: CompleteDayKpi = DayKpiCalculator.computeDayKpi(transactions, List(productsOne, productsTwo).toStream)
 
     // ASSERT
     dayKpiResult.date shouldBe dayDate
@@ -81,7 +81,7 @@ class IndicatorCalculatorSpec extends FlatSpec with Matchers {
 
   "The Indicator Calculator" should "output correct turnover results" in {
     // EXECUTE
-    val dayKpiResult: CompleteDayKpi = IndicatorCalculator.computeDayKpi(transactions, List(productsOne, productsTwo).toStream)
+    val dayKpiResult: CompleteDayKpi = DayKpiCalculator.computeDayKpi(transactions, List(productsOne, productsTwo).toStream)
 
     // ASSERT
     dayKpiResult.date shouldBe dayDate
@@ -113,9 +113,9 @@ class IndicatorCalculatorSpec extends FlatSpec with Matchers {
     val dayProducts = List(productsOne, productsTwo).toStream
 
     // EXECUTE
-    val productOneShopOnePrice: Double = IndicatorCalculator.getProductPriceFromProducts(productIdOne, shopUuidOne, dayProducts)
-    val productOneShopTwoPrice: Double = IndicatorCalculator.getProductPriceFromProducts(productIdOne, shopUuidTwo, dayProducts)
-    val productTwoShopOnePrice: Double = IndicatorCalculator.getProductPriceFromProducts(productIdTwo, shopUuidOne, dayProducts)
+    val productOneShopOnePrice: Double = DayKpiCalculator.getProductPriceFromProducts(productIdOne, shopUuidOne, dayProducts)
+    val productOneShopTwoPrice: Double = DayKpiCalculator.getProductPriceFromProducts(productIdOne, shopUuidTwo, dayProducts)
+    val productTwoShopOnePrice: Double = DayKpiCalculator.getProductPriceFromProducts(productIdTwo, shopUuidOne, dayProducts)
 
     // ASSERT
     productOneShopOnePrice shouldBe 12.2
