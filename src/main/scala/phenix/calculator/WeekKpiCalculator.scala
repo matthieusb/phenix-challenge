@@ -13,22 +13,22 @@ object WeekKpiCalculator extends LazyLogging with Calculator {
   /**
     * TODO Documentation
     *
-    * @param weekCompleteDayKpis a Stream of only 7 CompleteDayKpis, should be filtered and sorted before so that the oldest date is a the top.
+    * @param completeDayKpis a Stream of only 7 CompleteDayKpis, should be filtered and sorted before so that the oldest date is a the top.
     */
-  def computeWeekKpi(lastDayDate: LocalDate, weekCompleteDayKpis: Stream[CompleteDayKpi]): WeekKpi = {
-    val allShopSales = weekCompleteDayKpis.flatMap(completeDayKpi =>  completeDayKpi.dayShopSales)
+  def computeWeekKpi(lastDayDate: LocalDate, completeDayKpis: Stream[CompleteDayKpi]): CompleteWeekKpi = {
+    val allShopSales = completeDayKpis.flatMap(completeDayKpi =>  completeDayKpi.dayShopSales)
     val weekShopSales = computeWeekShopSales(allShopSales)
 
-    val allGlobalSales = weekCompleteDayKpis.map(completeDayKpi => completeDayKpi.dayGlobalSales)
+    val allGlobalSales = completeDayKpis.map(completeDayKpi => completeDayKpi.dayGlobalSales)
     val weekGlobalSales = computeWeekGlobalSales(allGlobalSales)
 
-    val allShopTurnovers = weekCompleteDayKpis.flatMap(completeDayKpi =>  completeDayKpi.dayShopTurnovers)
+    val allShopTurnovers = completeDayKpis.flatMap(completeDayKpi =>  completeDayKpi.dayShopTurnovers)
     val weekShopTurnovers = computeWeekShopTurnovers(allShopTurnovers)
 
-    val allGlobalTurnovers = weekCompleteDayKpis.map(completeDayKpi => completeDayKpi.dayGlobalTurnover)
+    val allGlobalTurnovers = completeDayKpis.map(completeDayKpi => completeDayKpi.dayGlobalTurnover)
     val weekGlobalTurnovers = computeWeekGlobalTurnovers(allGlobalTurnovers)
 
-    WeekKpi(lastDayDate, weekShopSales, weekGlobalSales, weekShopTurnovers, weekGlobalTurnovers)
+    CompleteWeekKpi(lastDayDate, weekShopSales, weekGlobalSales, weekShopTurnovers, weekGlobalTurnovers)
   }
 
   def computeWeekShopSales(allShopSales: Stream[ShopSale]): Stream[ShopSale] = {

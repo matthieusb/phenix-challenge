@@ -30,8 +30,8 @@ object Orchestrator extends LazyLogging {
         })
 
         if (!arguments.simpleCalc) { // Week calculations done only if no -s flag in cli
-          val weekKpi = doWeekCalculations(allCompleteDayKpi)
-          FileOrchestrator.outputWeekKpi(arguments.outputFolder, weekKpi.truncateTop100())
+          val completeWeekKpi = doWeekCalculations(allCompleteDayKpi)
+          FileOrchestrator.outputWeekKpi(arguments.outputFolder, completeWeekKpi.truncateTop100())
         }
       }
     }
@@ -45,19 +45,16 @@ object Orchestrator extends LazyLogging {
     }).toStream
   }
 
-  def doWeekCalculations(allCompleteDayKpi: Stream[CompleteDayKpi]): WeekKpi = {
+  def doWeekCalculations(allCompleteDayKpi: Stream[CompleteDayKpi]): CompleteWeekKpi = {
     val lastDayDate = allCompleteDayKpi.take(1) match {
       case element #:: Stream.Empty => element.date
     }
 
-
-    // TODO Check if the right files are being gotten for week calculation
+    // TODO IMPORTANT Check if the right files are being gotten for week calculation
     // Example: case where last 7 dates are further than a week old
 
     WeekKpiCalculator.computeWeekKpi(lastDayDate, allCompleteDayKpi.take(7)) // TODO Check if these are sorted by date, this is important
   }
-
-
 
   /**
     * Sorts the Transactions and products extract from a file so that they are in descending order.

@@ -75,9 +75,9 @@ case class CompleteDayKpi(date: LocalDate, dayShopSales: Stream[ShopSale], dayGl
   }
 }
 
-case class WeekKpi(lastDayDate: LocalDate, weekShopSales: Stream[ShopSale], weekGlobalSales: GlobalSale,
-                   weekShopTurnover: Stream[ShopTurnover], weekGlobalTurnover: GlobalTurnover) {
-  def sortResults(): WeekKpi = {
+case class CompleteWeekKpi(lastDayDate: LocalDate, weekShopSales: Stream[ShopSale], weekGlobalSales: GlobalSale,
+                           weekShopTurnover: Stream[ShopTurnover], weekGlobalTurnover: GlobalTurnover) {
+  def sortResults(): CompleteWeekKpi = {
     this.copy(
       weekShopSales = this.weekShopSales.map(_.sort()),
       weekGlobalSales = this.weekGlobalSales.sort(),
@@ -86,7 +86,7 @@ case class WeekKpi(lastDayDate: LocalDate, weekShopSales: Stream[ShopSale], week
     )
   }
 
-  def truncateTop100(): WeekKpi = {
+  def truncateTop100(): CompleteWeekKpi = {
     this.copy(
       weekShopSales = this.weekShopSales.map(_.truncateTop100()),
       weekGlobalSales = this.weekGlobalSales.truncateTop100(),

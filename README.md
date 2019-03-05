@@ -37,6 +37,7 @@ Si vous avez besoin d'aide sur l'utilisation de la CLI/
 java -jar votrejar.jar -h
 ```
 
+**NOTE:** Les fichiers de données doivent être conformes aux exemples et ne pas contenir de variations, sous peine d'une erreur fatale.
 
 ## Développement
 

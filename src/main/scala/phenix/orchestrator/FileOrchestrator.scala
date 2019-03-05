@@ -1,17 +1,48 @@
 package phenix.orchestrator
 
 import java.nio.file.Path
+import java.time.LocalDate
 
 import com.typesafe.scalalogging.LazyLogging
 import phenix.model._
 import phenix.service._
 import scalaz.std.stream.streamSyntax._
 
+/**
+  * Handles generating output files with their name and content
+  *
+  * @tparam T should be used as the per Shop type
+  * @tparam U should be used as the per Global type
+  */
+trait FileOutputOrchestrator[T, U] {
+  def generateShopOutput(date: LocalDate, shopdRecords: Stream[T], fileNameFunc: (LocalDate, String) => String): Stream[FileOutput]
 
-trait FileOutputOrchestrator {
-  
+  def generatGlobalOutput(date: LocalDate, globalRecord: U, fileNameFunc: LocalDate => String): Stream[FileOutput]
 }
 
+object FileOutputProductSaleOrchestrator extends FileOutputOrchestrator[ShopSale, GlobalSale] {
+  override def generateShopOutput(date: LocalDate, shopSales: Stream[ShopSale], fileNameFunc: (LocalDate, String) => String): Stream[FileOutput] = {
+    shopSales.map(shopSale => {
+      FileOutput(fileNameFunc(date, shopSale.shopUuid), ProductSaleUnmarshaller.unmarshallRecords(shopSale.productSales))
+    })
+  }
+
+  override def generatGlobalOutput(date: LocalDate, globalSale: GlobalSale, fileNameFunc: LocalDate => String): Stream[FileOutput] = {
+    Stream(FileOutput(fileNameFunc(date), ProductSaleUnmarshaller.unmarshallRecords(globalSale.productSales)))
+  }
+}
+
+object FileOutputProductTurnoverOrchestrator extends FileOutputOrchestrator[ShopTurnover, GlobalTurnover] {
+  override def generateShopOutput(date: LocalDate, shopTurnovers: Stream[ShopTurnover], fileNameFunc: (LocalDate, String) => String): Stream[FileOutput] = {
+    shopTurnovers.map(shopSale => {
+      FileOutput(fileNameFunc(date, shopSale.shopUuid), ProductTurnoverUnmarshaller.unmarshallRecords(shopSale.productTurnovers))
+    })
+  }
+
+  override def generatGlobalOutput(date: LocalDate, globalTurnover: GlobalTurnover, fileNameFunc: LocalDate => String): Stream[FileOutput] = {
+    Stream(FileOutput(fileNameFunc(date), ProductTurnoverUnmarshaller.unmarshallRecords(globalTurnover.productTurnovers)))
+  }
+}
 
 
 /**
@@ -66,57 +97,34 @@ object FileOrchestrator extends LazyLogging with FileIngester with FileProducer 
     * @param completeDayKpi valid completeDayKpis objects
     */
   def outputCompleteDayKpi(outputFolder: Path, completeDayKpi: CompleteDayKpi): Unit = {
-    val dayShopSalesFileOutput = completeDayKpi.dayShopSales.map(dayShopSale => {
-      FileOutput(ProductSaleFileNameService.generateDayShopFileName(completeDayKpi.date, dayShopSale.shopUuid),
-        ProductSaleUnmarshaller.unmarshallRecords(dayShopSale.productSales))
-    })
+    val dayShopSalesFileOutput = FileOutputProductSaleOrchestrator
+      .generateShopOutput(completeDayKpi.date, completeDayKpi.dayShopSales, ProductSaleFileNameService.generateDayShopFileName)
+    val dayGlobalSaleOutput = FileOutputProductSaleOrchestrator.generatGlobalOutput(completeDayKpi.date, completeDayKpi.dayGlobalSales, ProductSaleFileNameService.generateDayGlobalFileName)
 
-    val dayGlobalSaleOutput = Stream(FileOutput(ProductSaleFileNameService.generateDayGlobalFileName(completeDayKpi.date),
-      ProductSaleUnmarshaller.unmarshallRecords(completeDayKpi.dayGlobalSales.productSales)))
-
-    val dayShopTurnoversFileOutput = completeDayKpi.dayShopTurnovers.map(dayShopTurnover => {
-      FileOutput(ProductTurnoverFileNameService.generateDayShopFileName(completeDayKpi.date, dayShopTurnover.shopUuid),
-        ProductTurnoverUnmarshaller.unmarshallRecords(dayShopTurnover.productTurnovers))
-    })
-
-    val dayGlobalTurnoverOutput = Stream(FileOutput(ProductTurnoverFileNameService.generateDayGlobalFileName(completeDayKpi.date),
-      ProductTurnoverUnmarshaller.unmarshallRecords(completeDayKpi.dayGlobalTurnover.productTurnovers)))
+    val dayShopTurnoversFileOutput =
+      FileOutputProductTurnoverOrchestrator.generateShopOutput(completeDayKpi.date, completeDayKpi.dayShopTurnovers, ProductTurnoverFileNameService.generateDayShopFileName)
+    val dayGlobalTurnoverOutput = FileOutputProductTurnoverOrchestrator.generatGlobalOutput(completeDayKpi.date, completeDayKpi.dayGlobalTurnover, ProductTurnoverFileNameService.generateDayGlobalFileName)
 
     mergeAndOutputAllStreams(outputFolder, dayShopSalesFileOutput, dayGlobalSaleOutput, dayShopTurnoversFileOutput, dayGlobalTurnoverOutput)
   }
 
-  def outputWeekKpi(outputFolder: Path, weekKpi: WeekKpi): Unit = {
-    val weekShopSalesFileOutput = weekKpi.weekShopSales.map(weekShopSale => {
-      FileOutput(ProductSaleFileNameService.generateWeekShopFileName(weekKpi.lastDayDate, weekShopSale.shopUuid),
-        ProductSaleUnmarshaller.unmarshallRecords(weekShopSale.productSales))
-    })
+  def outputWeekKpi(outputFolder: Path, weekKpi: CompleteWeekKpi): Unit = {
+    val weekShopSalesFileOutput = FileOutputProductSaleOrchestrator
+      .generateShopOutput(weekKpi.lastDayDate, weekKpi.weekShopSales, ProductTurnoverFileNameService.generateWeekShopFileName)
+    val weekGlobalSaleOutput = FileOutputProductSaleOrchestrator.generatGlobalOutput(weekKpi.lastDayDate, weekKpi.weekGlobalSales, ProductTurnoverFileNameService.generateWeekGlobalFileName)
 
-    val weekGlobalSaleOutput = Stream(
-      FileOutput(ProductSaleFileNameService.generateWeekGlobalFileName(weekKpi.lastDayDate),
-        ProductSaleUnmarshaller.unmarshallRecords(weekKpi.weekGlobalSales.productSales))
-    )
-
-    val weekShopTurnoverOutput = weekKpi.weekShopTurnover.map(weekShopTurnover => {
-      FileOutput(ProductTurnoverFileNameService.generateWeekShopFileName(weekKpi.lastDayDate, weekShopTurnover.shopUuid),
-        ProductTurnoverUnmarshaller.unmarshallRecords(weekShopTurnover.productTurnovers))
-    })
-
-    val weekGlobalTurnoverOutput = Stream(
-      FileOutput(ProductTurnoverFileNameService.generateWeekGlobalFileName(weekKpi.lastDayDate),
-        ProductTurnoverUnmarshaller.unmarshallRecords(weekKpi.weekGlobalTurnover.productTurnovers))
-    )
+    val weekShopTurnoverOutput =
+      FileOutputProductTurnoverOrchestrator.generateShopOutput(weekKpi.lastDayDate, weekKpi.weekShopTurnover, ProductTurnoverFileNameService.generateWeekShopFileName)
+    val weekGlobalTurnoverOutput = FileOutputProductTurnoverOrchestrator.generatGlobalOutput(weekKpi.lastDayDate, weekKpi.weekGlobalTurnover, ProductTurnoverFileNameService.generateWeekGlobalFileName)
 
     mergeAndOutputAllStreams(outputFolder, weekShopSalesFileOutput, weekGlobalSaleOutput, weekShopTurnoverOutput, weekGlobalTurnoverOutput)
   }
 
-  def mergeAndOutputAllStreams(outputFolder: Path, stream1: Stream[FileOutput], stream2: Stream[FileOutput],
-                               stream3: Stream[FileOutput], stream4: Stream[FileOutput]): Unit = {
-    val completeFileOutputs = stream1
-    .interleave(stream2)
-    .interleave(stream3)
-    .interleave(stream4)
+  def mergeAndOutputAllStreams(outputFolder: Path, fileOutputStreams: Stream[FileOutput]*): Unit = {
+    val emptyFileOutputStream : Stream[FileOutput] = Stream()
+    val allFileOutputs = fileOutputStreams.foldLeft(emptyFileOutputStream)((acc, stream2) => acc interleave stream2)
 
-    outputKpis(KpiOutput(outputFolder, completeFileOutputs))
+    outputKpis(KpiOutput(outputFolder, allFileOutputs))
   }
 
   /**
