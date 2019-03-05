@@ -12,6 +12,8 @@ trait FileOutputOrchestrator {
   
 }
 
+
+
 /**
   * Orchestrates operations on files for this project.
   *
@@ -66,19 +68,19 @@ object FileOrchestrator extends LazyLogging with FileIngester with FileProducer 
   def outputCompleteDayKpi(outputFolder: Path, completeDayKpi: CompleteDayKpi): Unit = {
     val dayShopSalesFileOutput = completeDayKpi.dayShopSales.map(dayShopSale => {
       FileOutput(ProductSaleFileNameService.generateDayShopFileName(completeDayKpi.date, dayShopSale.shopUuid),
-        ProductSaleUnmarshaller.unmarshallRecords(dayShopSale.productSales.take(TOP_NUMBER_OF_VALUES)))
+        ProductSaleUnmarshaller.unmarshallRecords(dayShopSale.productSales))
     })
 
     val dayGlobalSaleOutput = Stream(FileOutput(ProductSaleFileNameService.generateDayGlobalFileName(completeDayKpi.date),
-      ProductSaleUnmarshaller.unmarshallRecords(completeDayKpi.dayGlobalSales.productSales.take(TOP_NUMBER_OF_VALUES))))
+      ProductSaleUnmarshaller.unmarshallRecords(completeDayKpi.dayGlobalSales.productSales)))
 
     val dayShopTurnoversFileOutput = completeDayKpi.dayShopTurnovers.map(dayShopTurnover => {
       FileOutput(ProductTurnoverFileNameService.generateDayShopFileName(completeDayKpi.date, dayShopTurnover.shopUuid),
-        ProductTurnoverUnmarshaller.unmarshallRecords(dayShopTurnover.productTurnovers.take(TOP_NUMBER_OF_VALUES)))
+        ProductTurnoverUnmarshaller.unmarshallRecords(dayShopTurnover.productTurnovers))
     })
 
     val dayGlobalTurnoverOutput = Stream(FileOutput(ProductTurnoverFileNameService.generateDayGlobalFileName(completeDayKpi.date),
-      ProductTurnoverUnmarshaller.unmarshallRecords(completeDayKpi.dayGlobalTurnover.productTurnovers.take(TOP_NUMBER_OF_VALUES))))
+      ProductTurnoverUnmarshaller.unmarshallRecords(completeDayKpi.dayGlobalTurnover.productTurnovers)))
 
     mergeAndOutputAllStreams(outputFolder, dayShopSalesFileOutput, dayGlobalSaleOutput, dayShopTurnoversFileOutput, dayGlobalTurnoverOutput)
   }
@@ -107,7 +109,8 @@ object FileOrchestrator extends LazyLogging with FileIngester with FileProducer 
     mergeAndOutputAllStreams(outputFolder, weekShopSalesFileOutput, weekGlobalSaleOutput, weekShopTurnoverOutput, weekGlobalTurnoverOutput)
   }
 
-  def mergeAndOutputAllStreams(outputFolder: Path, stream1: Stream[FileOutput], stream2: Stream[FileOutput], stream3: Stream[FileOutput], stream4: Stream[FileOutput]): Unit = {
+  def mergeAndOutputAllStreams(outputFolder: Path, stream1: Stream[FileOutput], stream2: Stream[FileOutput],
+                               stream3: Stream[FileOutput], stream4: Stream[FileOutput]): Unit = {
     val completeFileOutputs = stream1
     .interleave(stream2)
     .interleave(stream3)

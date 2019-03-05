@@ -7,6 +7,8 @@ import phenix.orchestrator.Orchestrator
 
 object Main extends App {
   val argumentsConf = new ArgumentsConfig(args)
-  Orchestrator.launchProcess(FolderArguments(Paths.get(argumentsConf.inputFolder()), Paths.get(argumentsConf.outputFolder())))
+
+  val folderArguments = FolderArguments(Paths.get(argumentsConf.inputFolder()), Paths.get(argumentsConf.outputFolder()), argumentsConf.simpleCalc())
+  Orchestrator.launchProcess(folderArguments)
 }
 

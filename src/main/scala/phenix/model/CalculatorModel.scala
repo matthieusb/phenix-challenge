@@ -14,8 +14,13 @@ abstract class Shop {
 }
 
 case class ShopSale(shopUuid: String, productSales: Stream[ProductSale]) extends Shop {
+
   def sort(): ShopSale = {
     this.copy(productSales = this.productSales.sorted.reverse)
+  }
+
+  def truncateTop100(): ShopSale = {
+    this.copy(productSales = productSales.take(100))
   }
 }
 
@@ -23,17 +28,29 @@ case class GlobalSale(productSales: Stream[ProductSale]) {
   def sort(): GlobalSale = {
     this.copy(productSales = this.productSales.sorted.reverse)
   }
+
+  def truncateTop100(): GlobalSale = {
+    this.copy(productSales = productSales.take(100))
+  }
 }
 
 case class ShopTurnover(shopUuid: String, productTurnovers: Stream[ProductTurnover]) extends Shop {
   def sort(): ShopTurnover = {
     this.copy(productTurnovers = this.productTurnovers.sorted.reverse)
   }
+
+  def truncateTop100(): ShopTurnover = {
+    this.copy(productTurnovers = productTurnovers.take(100))
+  }
 }
 
 case class GlobalTurnover(productTurnovers: Stream[ProductTurnover]) {
   def sort(): GlobalTurnover = {
     this.copy(productTurnovers = this.productTurnovers.sorted.reverse)
+  }
+
+  def truncateTop100(): GlobalTurnover = {
+    this.copy(productTurnovers = productTurnovers.take(100))
   }
 }
 
@@ -48,7 +65,14 @@ case class CompleteDayKpi(date: LocalDate, dayShopSales: Stream[ShopSale], dayGl
     )
   }
 
-  // TODO Add the truncate method here
+  def truncateTop100(): CompleteDayKpi = {
+    this.copy(
+      dayShopSales = this.dayShopSales.map(_.truncateTop100()),
+      dayGlobalSales = this.dayGlobalSales.truncateTop100(),
+      dayShopTurnovers = this.dayShopTurnovers.map(_.truncateTop100()),
+      dayGlobalTurnover = this.dayGlobalTurnover.truncateTop100()
+    )
+  }
 }
 
 case class WeekKpi(lastDayDate: LocalDate, weekShopSales: Stream[ShopSale], weekGlobalSales: GlobalSale,
@@ -62,5 +86,12 @@ case class WeekKpi(lastDayDate: LocalDate, weekShopSales: Stream[ShopSale], week
     )
   }
 
-  // TODO Add truncate method
+  def truncateTop100(): WeekKpi = {
+    this.copy(
+      weekShopSales = this.weekShopSales.map(_.truncateTop100()),
+      weekGlobalSales = this.weekGlobalSales.truncateTop100(),
+      weekShopTurnover = this.weekShopTurnover.map(_.truncateTop100()),
+      weekGlobalTurnover = this.weekGlobalTurnover.truncateTop100()
+    )
+  }
 }
