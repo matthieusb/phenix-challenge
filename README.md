@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/matthieusb/phenix-challenge.svg?branch=master)](https://travis-ci.org/matthieusb/phenix-challenge)
 [![Coverage Status](https://coveralls.io/repos/github/matthieusb/phenix-challenge/badge.svg?branch=master)](https://coveralls.io/github/matthieusb/phenix-challenge?branch=master)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fmatthieusb%2Fphenix-challenge.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fmatthieusb%2Fphenix-challenge?ref=badge_shield)
 
 Solution apportée au projet Carrefour https://github.com/Carrefour-Group/phenix-challenge
 
@@ -97,3 +98,7 @@ cpulimit -l 25 sbt run &
 
 
 
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fmatthieusb%2Fphenix-challenge.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fmatthieusb%2Fphenix-challenge?ref=badge_large)
